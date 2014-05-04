@@ -100,7 +100,7 @@ public final class Datastore {
 
 		try {
 			insertStatement = connect
-					.prepareStatement("insert into  eHonk.DRIVER_REGISTER values (default, ?, ?, ?, ?)");
+					.prepareStatement("insert into  eHonk.DRIVER_REGISTER values (default, ?, ?, ?, ?, default)");
 		} catch (SQLException e) {
 			logger.info("Unable to prepare insertStatement");
 			close();

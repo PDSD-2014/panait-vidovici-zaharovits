@@ -10,7 +10,15 @@ public class NoDriverRegisterProcessor implements PayloadProcessor {
   @Override
   public void handleMessage(CcsMessage msg) {
   		/* just log I am not a driver message */
-  	  logger.log(Level.INFO, "I am not a driver: " + msg.getFrom());
+  		final String gcmRegId = msg.getFrom();
+  	  logger.log(Level.INFO, "I am not a driver: " + gcmRegId);
+  	  final Datastore ds = Datastore.getDatastore();
+  		try {
+  			/* registering all */
+  			ds.unregister(gcmRegId);
+  		} catch (SQLException e) {
+  			e.printStackTrace();
+  		}
   }
 
 }

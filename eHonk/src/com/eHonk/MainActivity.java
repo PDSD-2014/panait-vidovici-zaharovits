@@ -118,9 +118,9 @@ public class MainActivity extends ActionBarActivity {
 			Log.i(TAG, "No valid Google Play Services APK found.");
 		}
 	}
-	
+
 	protected void onCreateSecondStage(Bundle savedInstanceState) {
-		
+
 	}
 
 	@Override
@@ -132,8 +132,7 @@ public class MainActivity extends ActionBarActivity {
 				Toast.makeText(getApplicationContext(),
 				    context.getString(R.string.needs_internet_alert_title),
 				    Toast.LENGTH_LONG).show();
-			}
-			else if(getRegistrationId(context).isEmpty()) {
+			} else if (getRegistrationId(context).isEmpty()) {
 				gcmRegisterTask = registerInBackground();
 			}
 		}
@@ -367,6 +366,8 @@ public class MainActivity extends ActionBarActivity {
 							            .toString();
 							        data.putString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 							            offender_license_plate);
+							        data.putString(Constants.PROPERTY_MESSAGE_TYPE,
+							            Constants.LABEL_NOTIFY_MESSAGE);
 
 							        long backoff = BACKOFF_MILLI_SECONDS
 							            + random.nextInt(1000);
@@ -551,7 +552,8 @@ public class MainActivity extends ActionBarActivity {
 							    Toast.LENGTH_LONG).show();
 
 							// close Registration fragment
-							//getSupportFragmentManager().popBackStack("tag2", 0); TODO : label popBackStack
+							// getSupportFragmentManager().popBackStack("tag2", 0); TODO :
+							// label popBackStack
 							getSupportFragmentManager().popBackStack(null, 0);
 						} else if (getApplicationContext() != null) {
 							// Toast.makeText(getApplicationContext(),
@@ -700,33 +702,31 @@ public class MainActivity extends ActionBarActivity {
 				    Intent i = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
 				    startActivityForResult(i, ENABLE_NETWORK_REQUEST);
 			    }
-		    })
-		    .setNeutralButton("Try again", new DialogInterface.OnClickListener() {
+		    }).setNeutralButton("Try again", new DialogInterface.OnClickListener() {
 			    public void onClick(DialogInterface dialog, int id) {
-			    	/* this wil be overwritten */
-			    	if(isOnline())
-			    		dialog.dismiss();
+				    /* this wil be overwritten */
+				    if (isOnline())
+					    dialog.dismiss();
 			    }
-		    })
-		    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 			    public void onClick(DialogInterface dialog, int id) {
 				    MainActivity.this.finish();
 			    }
 		    });
-		
+
 		final AlertDialog alert = builder.create();
 		alert.show();
-		
+
 		Button neutralButton = alert.getButton(DialogInterface.BUTTON_NEUTRAL);
 		neutralButton.setOnClickListener(new View.OnClickListener() {
-		    @Override
-		    public void onClick(View onClick) {
-		    	/* this wil be overwritten */
-		    	if(isOnline() && getRegistrationId(context).isEmpty()) {
-		    		gcmRegisterTask = registerInBackground();
-		    		alert.dismiss();
-		    	}
-		    }
+			@Override
+			public void onClick(View onClick) {
+				/* this wil be overwritten */
+				if (isOnline() && getRegistrationId(context).isEmpty()) {
+					gcmRegisterTask = registerInBackground();
+					alert.dismiss();
+				}
+			}
 		});
 	}
 
