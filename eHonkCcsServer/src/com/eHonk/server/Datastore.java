@@ -100,7 +100,9 @@ public final class Datastore {
 
 		try {
 			insertStatement = connect
-					.prepareStatement("insert into  eHonk.DRIVER_REGISTER values (default, ?, ?, ?, ?, default)");
+					.prepareStatement("insert into  eHonk.DRIVER_REGISTER(ID,LICENSE_PLATE,COLOR,PHONE_NUMBER,REGISTER_ID,TS)" +
+							" values (default, ?, ?, ?, ?, default) ON DUPLICATE KEY UPDATE LICENSE_PLATE=VALUES(LICENSE_PLATE)," +
+							" COLOR=VALUES(COLOR), PHONE_NUMBER=VALUES(PHONE_NUMBER)");
 		} catch (SQLException e) {
 			logger.info("Unable to prepare insertStatement");
 			close();

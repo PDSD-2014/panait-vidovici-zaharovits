@@ -7,13 +7,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import android.R.bool;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,26 +19,20 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,7 +40,6 @@ import com.eHonk.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.android.gms.internal.cn;
 
 @SuppressLint("DefaultLocale")
 public class MainActivity extends ActionBarActivity {
@@ -63,13 +53,8 @@ public class MainActivity extends ActionBarActivity {
 	private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	private static final String PROPERTY_IS_REGISTERED = "is_registered";
 	private static final String PROPERTY_IS_DRIVER = "is_driver";
-	private static final String ACTION_REGISTER = Constants.PACKAGE + ".REGISTER";
-	private static final String ACTION_ECHO = Constants.PACKAGE + ".ECHO";
-	private static final String ACTION_MESSAGE = Constants.PACKAGE + ".MESSAGE";
-
-	/* change this for new releases so that apps re-register to GCM */
-	private static final String PROPERTY_APP_VERSION = "app_version";
-
+	private static final String PROPERTY_APP_VERSION = "app_version"; 	/* change this for new releases so that apps re-register to GCM */
+	
 	public static final String TAG = "eHonk GCM";
 
 	private AsyncTask<Void, Void, Boolean> gcmRegisterTask = null;

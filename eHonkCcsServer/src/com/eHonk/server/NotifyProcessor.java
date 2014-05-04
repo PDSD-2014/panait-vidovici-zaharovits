@@ -12,7 +12,8 @@ public class NotifyProcessor implements PayloadProcessor {
 	@Override
 	public void handleMessage(CcsMessage msg) {
 
-		Map<String, String> payload = new HashMap<String, String>(4);
+		Map<String, String> payload = new HashMap<String, String>(5);
+		payload.put(Constants.PROPERTY_MESSAGE_TYPE, Constants.LABEL_NOTIFY_MESSAGE);
 
 		final String license_plate = msg.getPayload().get(
 		    Constants.PROPERTY_LICENSE_PLATE);

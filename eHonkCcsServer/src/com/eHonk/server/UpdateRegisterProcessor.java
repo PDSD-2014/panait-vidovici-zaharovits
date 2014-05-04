@@ -2,8 +2,6 @@ package com.eHonk.server;
 
 import java.sql.SQLException;
 
-import com.eHonk.server.Datastore.DriverRecord;
-
 public class UpdateRegisterProcessor implements PayloadProcessor {
 
   @Override

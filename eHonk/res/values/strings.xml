@@ -3,11 +3,9 @@
 
     <string name="app_name">eHonk</string>
     <string name="action_settings">Settings</string>
-    
     <string name="send_buton">Send Message!</string>
     <string name="echo_button">Get echo!</string>
     <string name="stuck_button">I am stuck!</string>
-    
     <string name="register_button">Register</string>
     <string name="license_plate_hint">Enter License Plate</string>
     <string name="no_vehicule">No vehicle registered!</string>
@@ -15,21 +13,21 @@
     <string name="change_license">Change</string>
     <string name="change_license_title">Change License</string>
     <string name="stuck_dialog_title">Enter Offender License Plate</string>
-    
-    
     <string name="sender_id">253958722700</string>
     <string name="server_url">http://141.85.241.45:8080/eHonkHTTPServer2</string>
-    
     <string name="not_now">Not now</string>
     <string name="I_no_driver">I am not a driver</string>
     <string name="register_menu">Hi, what\'s your car?</string>
-    
     <string name="notify">Notify</string>
     <string name="cancel">Cancel</string>
-    
     <string name="failed_to_register_alert_title">Failed to connect</string>
-	<string name="failed_to_register_alert_message">The service is unavailable.\nPlease try again later!</string>
-	
-	<string name="needs_internet_alert_message">You need a network connection to use this application.\nPlease turn on mobile network or Wi-Fi in Settings.</string>
-	<string name="needs_internet_alert_title">Unable to connect.</string>
+    <string name="failed_to_register_alert_message">The service is unavailable.\nPlease try again later!</string>
+    <string name="needs_internet_alert_message">You need a network connection to use this application.\nPlease turn on mobile network or Wi-Fi in Settings.</string>
+    <string name="needs_internet_alert_title">Unable to connect.</string>
+    
+    <string name="ehonk_notification_title">You are kindly asked to move your car</string>
+    <string name="offense_notification_content1">You are blocking anonymous driver</string>
+    <string name="offense_notification_content2">You are blocking driver</string>
+    
+
 </resources>
