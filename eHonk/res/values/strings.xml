@@ -25,9 +25,12 @@
     <string name="needs_internet_alert_message">You need a network connection to use this application.\nPlease turn on mobile network or Wi-Fi in Settings.</string>
     <string name="needs_internet_alert_title">Unable to connect.</string>
     
-    <string name="ehonk_notification_title">You are kindly asked to move your car</string>
+    <string name="ehonk_notification_title">Hurry up!</string> <!--  alerted driver notification -->
     <string name="offense_notification_content1">You are blocking anonymous driver</string>
     <string name="offense_notification_content2">You are blocking driver</string>
+    
+    <string name="ehonk_notification_title2">We are sorry!</string> <!-- driver is unregistered -->
+    <string name="offense_notification_content3">Driver %s is not using eHonk</string>
     
 
 </resources>

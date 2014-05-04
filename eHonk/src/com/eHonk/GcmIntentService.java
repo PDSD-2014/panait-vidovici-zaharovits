@@ -60,9 +60,9 @@ public class GcmIntentService extends IntentService {
 			 * message types you're not interested in, or that you don't recognize.
 			 */
 			if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-				sendNotification("Send error: " + extras.toString());
+				sendNotification("Send error: " + extras.toString(), "Error title");
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-				sendNotification("Deleted messages on server: " + extras.toString());
+				sendNotification("Deleted messages on server: " + extras.toString(), "Error title");
 				// If it's a regular GCM message, do some work.
 			} else if (Constants.LABEL_NOTIFY_MESSAGE.equals(messageType)) {
 				String msg;
@@ -78,7 +78,13 @@ public class GcmIntentService extends IntentService {
 					    R.string.offense_notification_content2)
 					    + " " + offended_license;
 				}
-				sendNotification(msg);
+				sendNotification(msg, getApplicationContext().getString(R.string.ehonk_notification_title));
+			} else if (Constants.LABEL_UNKNOWNDRIVER_MESSAGE.equals(messageType)) {
+				String msg;
+				final String offender_license = (String) extras
+				    .get(Constants.PROPERTY_OFFENDER_LICENSE_PLATE);
+				msg = String.format(getApplicationContext().getString(R.string.offense_notification_content3), offender_license);
+				sendNotification(msg, getApplicationContext().getString(R.string.ehonk_notification_title2));
 			}
 			else {
 					Log.i(MainActivity.TAG, "Received message: " + extras.toString());
@@ -91,7 +97,7 @@ public class GcmIntentService extends IntentService {
 	// Put the message into a notification and post it.
 	// This is just one simple example of what you might choose to do with
 	// a GCM message.
-	private void sendNotification(String msg) {
+	private void sendNotification(String msg, String title) {
 		mNotificationManager = (NotificationManager) this
 		    .getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -100,9 +106,7 @@ public class GcmIntentService extends IntentService {
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
 		    .setSmallIcon(R.drawable.ic_launcher)
-		    .setContentTitle(
-		        getApplicationContext()
-		            .getString(R.string.ehonk_notification_title))
+		    .setContentTitle(title)
 		    .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
 		    .setContentText(msg);
 

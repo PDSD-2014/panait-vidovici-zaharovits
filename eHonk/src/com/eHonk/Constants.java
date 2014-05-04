@@ -17,6 +17,7 @@ public final class Constants {
 	public static final String PROPERTY_MESSAGE_TYPE = "message_type";
 	
 	public static final String LABEL_REGISTER_MESSAGE = "register_message";
+	public static final String LABEL_UNKNOWNDRIVER_MESSAGE = "unknown_driver_message";
 	public static final String LABEL_NOTIFY_MESSAGE = "notify_message";
 	public static final String LABEL_ECHO_MESSAGE = "echo_message";
 	public static final String LABEL_CHANGEDRIVER_MESSAGE = "register_update_message";
