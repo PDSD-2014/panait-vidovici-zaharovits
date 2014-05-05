@@ -32,5 +32,7 @@
     <string name="ehonk_notification_title2">We are sorry!</string> <!-- driver is unregistered -->
     <string name="offense_notification_content3">Driver %s is not using eHonk</string>
     
+    <string name="ehonk_notification_title3">Notification sent!</string> <!-- one or more drivers have been alerted -->
+    <string name="offense_notification_content4">eHonk notified %s drivers</string>
 
 </resources>

@@ -62,7 +62,8 @@ public class GcmIntentService extends IntentService {
 			if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
 				sendNotification("Send error: " + extras.toString(), "Error title");
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-				sendNotification("Deleted messages on server: " + extras.toString(), "Error title");
+				sendNotification("Deleted messages on server: " + extras.toString(),
+				    "Error title");
 				// If it's a regular GCM message, do some work.
 			} else if (Constants.LABEL_NOTIFY_MESSAGE.equals(messageType)) {
 				String msg;
@@ -78,16 +79,35 @@ public class GcmIntentService extends IntentService {
 					    R.string.offense_notification_content2)
 					    + " " + offended_license;
 				}
-				sendNotification(msg, getApplicationContext().getString(R.string.ehonk_notification_title));
+				sendNotification(msg,
+				    getApplicationContext()
+				        .getString(R.string.ehonk_notification_title));
 			} else if (Constants.LABEL_UNKNOWNDRIVER_MESSAGE.equals(messageType)) {
 				String msg;
 				final String offender_license = (String) extras
 				    .get(Constants.PROPERTY_OFFENDER_LICENSE_PLATE);
-				msg = String.format(getApplicationContext().getString(R.string.offense_notification_content3), offender_license);
-				sendNotification(msg, getApplicationContext().getString(R.string.ehonk_notification_title2));
-			}
-			else {
-					Log.i(MainActivity.TAG, "Received message: " + extras.toString());
+				msg = String.format(
+				    getApplicationContext().getString(
+				        R.string.offense_notification_content3), offender_license);
+				sendNotification(
+				    msg,
+				    getApplicationContext().getString(
+				        R.string.ehonk_notification_title2));
+			} else if (Constants.LABEL_NOTIFYACK_MESSAGE.equals(messageType)) {
+				String msg;
+				final String offender_license = (String) extras
+				    .get(Constants.PROPERTY_OFFENDER_LICENSE_PLATE);
+				final String count_alerted_drivers = (String) extras
+				    .get(Constants.PROPERTY_OFFENDERS_COUNT);
+				msg = String.format(
+				    getApplicationContext().getString(
+				        R.string.offense_notification_content4), count_alerted_drivers);
+				sendNotification(
+				    msg,
+				    getApplicationContext().getString(
+				        R.string.ehonk_notification_title3));
+			} else {
+				Log.i(MainActivity.TAG, "Received message: " + extras.toString());
 			}
 		}
 		// Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -105,8 +125,7 @@ public class GcmIntentService extends IntentService {
 		    new Intent(this, MainActivity.class), 0);
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-		    .setSmallIcon(R.drawable.ic_launcher)
-		    .setContentTitle(title)
+		    .setSmallIcon(R.drawable.ic_launcher).setContentTitle(title)
 		    .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
 		    .setContentText(msg);
 

@@ -45,6 +45,18 @@ public class NotifyProcessor implements PayloadProcessor {
 					    false);
 					client.send(jsonRequest);
 				}
+				
+				/* send ACK back to offended */
+				payload.clear();
+				payload.put(Constants.PROPERTY_MESSAGE_TYPE, Constants.LABEL_NOTIFYACK_MESSAGE);
+				payload.put(Constants.PROPERTY_OFFENDERS_COUNT, ""+offenders.size());
+				payload.put(Constants.PROPERTY_OFFENDER_LICENSE_PLATE, offender_license_plate);
+				String jsonRequest = CcsClient.createJsonMessage(
+				    msg.getFrom(), /* to */
+				    client.getRandomMessageId(msg.getFrom().substring(0, 10)), payload,
+				    null, null, // TTL (null -> default-TTL)
+				    false);
+				client.send(jsonRequest);
 			}
 			else {
 				payload.put(Constants.PROPERTY_MESSAGE_TYPE, Constants.LABEL_UNKNOWNDRIVER_MESSAGE);
@@ -58,7 +70,6 @@ public class NotifyProcessor implements PayloadProcessor {
 				client.send(jsonRequest);
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			ds.close();
 		}
