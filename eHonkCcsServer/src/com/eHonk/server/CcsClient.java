@@ -485,6 +485,7 @@ public class CcsClient {
 		// final String password = args[1];
 		final String password = mApiKey;
 
+		//CcsClient ccsClient = CcsClient.prepareClient(projectId, password, true);
 		CcsClient ccsClient = CcsClient.prepareClient(projectId, password, true);
 
 		try {

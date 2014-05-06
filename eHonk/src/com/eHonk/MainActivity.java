@@ -690,8 +690,6 @@ public class MainActivity extends ActionBarActivity {
 		    }).setNeutralButton("Try again", new DialogInterface.OnClickListener() {
 			    public void onClick(DialogInterface dialog, int id) {
 				    /* this wil be overwritten */
-				    if (isOnline())
-					    dialog.dismiss();
 			    }
 		    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 			    public void onClick(DialogInterface dialog, int id) {
@@ -707,8 +705,9 @@ public class MainActivity extends ActionBarActivity {
 			@Override
 			public void onClick(View onClick) {
 				/* this wil be overwritten */
-				if (isOnline() && getRegistrationId(context).isEmpty()) {
-					gcmRegisterTask = registerInBackground();
+				if (isOnline()) {
+					if(getRegistrationId(context).isEmpty())
+						gcmRegisterTask = registerInBackground();
 					alert.dismiss();
 				}
 			}
