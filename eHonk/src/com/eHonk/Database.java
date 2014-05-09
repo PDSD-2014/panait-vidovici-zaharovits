@@ -17,6 +17,7 @@ public class Database extends SQLiteOpenHelper {
 		private int notification_id;
 		private String offender_license;
 		private String timestamp;
+		private int type_code;
 		private int status_code;
 		private String other_details;
 		private int retries_count;
@@ -32,6 +33,12 @@ public class Database extends SQLiteOpenHelper {
     }
 		public void setTimestamp(String timestamp) {
 	    this.timestamp = timestamp;
+    }
+		public int getTypeCode() {
+	    return type_code;
+    }
+		public void setTypeCode(int type_code) {
+	    this.type_code = type_code;
     }
 		public int getStatusCode() {
 	    return status_code;
@@ -70,6 +77,7 @@ public class Database extends SQLiteOpenHelper {
 	public static final String NOTIFICATIONS_OFFENDER_LICENSE = "offender_license";
 	public static final String NOTIFICATIONS_TIMESTAMP = "timestamp";
 	public static final String NOTIFICATIONS_STATUS_CODE = "status_code";
+	public static final String NOTIFICATIONS_TYPE_CODE = "type_code";
 	public static final String NOTIFICATIONS_OTHER_DETAILS = "other_details";
 	public static final String NOTIFICATIONS_RETRIES_COUNT = "retries_count";
 
@@ -79,6 +87,11 @@ public class Database extends SQLiteOpenHelper {
 	public static final int NOTIFICATION_STATUS_TIMEOUT = 4;
 	public static final int NOTIFICATION_STATUS_ACK_OK = 5;
 	public static final int NOTIFICATION_STATUS_ACK_IGN = 6;
+	
+	public static final int NOTIFICATION_TYPE_SENT = 1;
+	public static final int NOTIFICATION_TYPE_RECV = 2;
+	public static final int NOTIFICATION_TYPE_MULTISENT = 3;
+	public static final int NOTIFICATION_TYPE_MULTIRECV = 4;
 	
 	private static Database instance = null;
 	
@@ -99,6 +112,7 @@ public class Database extends SQLiteOpenHelper {
 				+ NOTIFICATIONS_LOG_ID + " INTEGER PRIMARY KEY, "
 				+ NOTIFICATIONS_OFFENDER_LICENSE + " TEXT, "
 				+ NOTIFICATIONS_TIMESTAMP + " TEXT, "
+				+ NOTIFICATIONS_TYPE_CODE + " INTEGER, "
 				+ NOTIFICATIONS_STATUS_CODE + " INTEGER, "
 				+ NOTIFICATIONS_OTHER_DETAILS + " TEXT, "
 				+ NOTIFICATIONS_RETRIES_COUNT + " INTEGER)";
@@ -117,6 +131,7 @@ public class Database extends SQLiteOpenHelper {
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(NOTIFICATIONS_OFFENDER_LICENSE, offense.getOffenderLicense());
 		contentValues.put(NOTIFICATIONS_TIMESTAMP, offense.getTimestamp());
+		contentValues.put(NOTIFICATIONS_TYPE_CODE, offense.getTypeCode());
 		contentValues.put(NOTIFICATIONS_STATUS_CODE, offense.getStatusCode());
 		contentValues.put(NOTIFICATIONS_OTHER_DETAILS, offense.getOtherDetails());
 		contentValues.put(NOTIFICATIONS_RETRIES_COUNT, offense.getRetriesCount());
@@ -144,9 +159,10 @@ public class Database extends SQLiteOpenHelper {
 				offense.setNotificationId(Integer.parseInt(cursor.getString(0)));
 				offense.setOffenderLicense(cursor.getString(1));
 				offense.setTimestamp(cursor.getString(2));
-				offense.setStatusCode(Integer.parseInt(cursor.getString(3)));
-				offense.setOtherDetails(cursor.getString(4));
-				offense.setRetriesCount(Integer.parseInt(cursor.getString(5)));
+				offense.setTypeCode(Integer.parseInt(cursor.getString(3)));
+				offense.setStatusCode(Integer.parseInt(cursor.getString(4)));
+				offense.setOtherDetails(cursor.getString(5));
+				offense.setRetriesCount(Integer.parseInt(cursor.getString(6)));
 				result.add(offense);
 			} while (cursor.moveToNext());
 		}
@@ -169,6 +185,7 @@ public class Database extends SQLiteOpenHelper {
     ContentValues values = new ContentValues();
     values.put(NOTIFICATIONS_OFFENDER_LICENSE, offense.getOffenderLicense());
     values.put(NOTIFICATIONS_TIMESTAMP, offense.getTimestamp());
+    values.put(NOTIFICATIONS_TYPE_CODE, offense.getTypeCode());
     values.put(NOTIFICATIONS_STATUS_CODE, offense.getStatusCode());
     values.put(NOTIFICATIONS_OTHER_DETAILS, offense.getOtherDetails());
     values.put(NOTIFICATIONS_RETRIES_COUNT, offense.getRetriesCount());
