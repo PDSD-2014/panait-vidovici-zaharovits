@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 /**
@@ -147,15 +148,24 @@ public class GcmIntentService extends IntentService {
 
 		Intent notifyIntent = new Intent(this, MainActivity.class);
 
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+		stackBuilder.addParentStack(MainActivity.class);
+		stackBuilder.addNextIntent(notifyIntent);
 		notifyIntent.setFlags(0);
+		
 		/*
 		 * notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
 		 * Intent.FLAG_ACTIVITY_NO_HISTORY |
 		 * Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 		 */
 
+		/*
 		PendingIntent notifyPendingIntent = PendingIntent.getActivity(this, 0,
 		    notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		 */
+		PendingIntent notifyPendingIntent =
+        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
 		    .setSmallIcon(R.drawable.ic_launcher).setContentTitle(title)

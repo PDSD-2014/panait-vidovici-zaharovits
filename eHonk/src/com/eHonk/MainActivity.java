@@ -50,24 +50,31 @@ public class MainActivity extends ActionBarActivity {
 	private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	private static final String PROPERTY_IS_REGISTERED = "is_registered";
 	private static final String PROPERTY_IS_DRIVER = "is_driver";
-	private static final String PROPERTY_APP_VERSION = "app_version"; /*
-																																		 * change
-																																		 * this for
-																																		 * new
-																																		 * releases
-																																		 * so that
-																																		 * apps
-																																		 * re-register
-																																		 * to GCM
-																																		 */
+	/* change this for new releases so that apps re-register to GCM */
+	private static final String PROPERTY_APP_VERSION = "app_version"; 
 
+	/* handy task pointer - MIGHT cause bugs? */
 	private AsyncTask<Void, Void, Boolean> gcmRegisterTask = null;
-
+	
+	/* persistent global variables */
 	final AtomicInteger msgId = new AtomicInteger();
 
+	/* not persistent global variables */
 	GoogleCloudMessaging gcm;
 	Context context;
 	String regid;
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+	  super.onSaveInstanceState(savedInstanceState);
+	  savedInstanceState.putInt("msgId", msgId.get());
+	}
+	
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+	  super.onRestoreInstanceState(savedInstanceState);
+	  msgId.set(savedInstanceState.getInt("msgId"));
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
