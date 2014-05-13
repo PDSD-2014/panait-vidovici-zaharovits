@@ -17,6 +17,7 @@
 package com.eHonk;
 
 import com.eHonk.R;
+import com.eHonk.Constants;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.app.IntentService;
@@ -37,9 +38,6 @@ import android.util.Log;
  */
 public class GcmIntentService extends IntentService {
 	public static final int NOTIFICATION_ID = 13136;
-
-	private NotificationManager mNotificationManager;
-	NotificationCompat.Builder builder;
 
 	public GcmIntentService() {
 		super("GcmIntentService");
@@ -66,22 +64,22 @@ public class GcmIntentService extends IntentService {
 				    "Error title");
 				// If it's a regular GCM message, do some work.
 			} else if (Constants.LABEL_NOTIFY_MESSAGE.equals(messageType)) {
-				String msg;
-				final String timestamp = (String) extras
-				    .get(Constants.PROPERTY_OFFENSE_TIMESTAMP);
-				final String offended_license = (String) extras
-				    .get(Constants.PROPERTY_OFFENDED_LICENSE_PLATE);
-				if (offended_license.isEmpty()) {
-					msg = getApplicationContext().getString(
-					    R.string.offense_notification_content1);
-				} else {
-					msg = getApplicationContext().getString(
-					    R.string.offense_notification_content2)
-					    + " " + offended_license;
-				}
-				sendNotification(msg,
-				    getApplicationContext()
-				        .getString(R.string.ehonk_notification_title));
+
+				Intent serviceIntent = new Intent(this,
+				    NotificationRecvIntentService.class);
+				serviceIntent.putExtra(Constants.PROPERTY_OFFENSE_TIMESTAMP,
+				    (String) extras.get(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+				serviceIntent.putExtra(Constants.PROPERTY_OFFENDED_LICENSE_PLATE,
+				    (String) extras.get(Constants.PROPERTY_OFFENDED_LICENSE_PLATE));
+				serviceIntent.putExtra(Constants.PROPERTY_OFFENDERS_COUNT,
+				    (String) extras.get(Constants.PROPERTY_OFFENDERS_COUNT));
+				serviceIntent.putExtra(Constants.PROPERTY_OFFENDED_GCM_ID,
+				    (String) extras.get(Constants.PROPERTY_OFFENDED_GCM_ID));
+				serviceIntent.putExtra(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
+				    (String) extras.get(Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
+
+				startService(serviceIntent);
+
 			} else if (Constants.LABEL_UNKNOWNDRIVER_MESSAGE.equals(messageType)) {
 				String msg;
 				final String offender_license = (String) extras
@@ -89,10 +87,12 @@ public class GcmIntentService extends IntentService {
 				msg = String.format(
 				    getApplicationContext().getString(
 				        R.string.offense_notification_content3), offender_license);
+
 				sendNotification(
 				    msg,
 				    getApplicationContext().getString(
 				        R.string.ehonk_notification_title2));
+
 			} else if (Constants.LABEL_NOTIFYACK_MESSAGE.equals(messageType)) {
 				String msg;
 				final String offender_license = (String) extras
@@ -102,12 +102,35 @@ public class GcmIntentService extends IntentService {
 				msg = String.format(
 				    getApplicationContext().getString(
 				        R.string.offense_notification_content4), count_alerted_drivers);
+
 				sendNotification(
 				    msg,
 				    getApplicationContext().getString(
 				        R.string.ehonk_notification_title3));
+			} else if (Constants.LABEL_NOTIFY_RESPONSE_MESSAGE.equals(messageType)) {
+				String msg ="", title ="";
+				final String response = extras
+				    .getString(Constants.PROPERTY_RESPONSE_TYPE);
+				final String offender_license = extras
+				    .getString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE);
+				if (response.equals(Constants.VALUE_RESPONSE_COMING)) {
+					msg = String.format(
+					    getApplicationContext().getString(
+					        R.string.yes_response_notification), offender_license);
+					title = getApplicationContext().getString(
+					    R.string.ehonk_notification_title4);
+				} else if (response.equals(Constants.VALUE_RESPONSE_IGNORE)) {
+					msg = String.format(
+					    getApplicationContext().getString(
+					        R.string.no_response_notification), offender_license);
+					title = getApplicationContext().getString(
+					    R.string.ehonk_notification_title5);
+				}
+				
+				sendNotification( msg, title);
+				
 			} else {
-				Log.i(MainActivity.TAG, "Received message: " + extras.toString());
+				Log.i(Constants.TAG, "Received message: " + extras.toString());
 			}
 		}
 		// Release the wake lock provided by the WakefulBroadcastReceiver.
@@ -118,18 +141,29 @@ public class GcmIntentService extends IntentService {
 	// This is just one simple example of what you might choose to do with
 	// a GCM message.
 	private void sendNotification(String msg, String title) {
-		mNotificationManager = (NotificationManager) this
+
+		NotificationManager mNotificationManager = (NotificationManager) this
 		    .getSystemService(Context.NOTIFICATION_SERVICE);
 
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-		    new Intent(this, MainActivity.class), 0);
+		Intent notifyIntent = new Intent(this, MainActivity.class);
+
+		notifyIntent.setFlags(0);
+		/*
+		 * notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+		 * Intent.FLAG_ACTIVITY_NO_HISTORY |
+		 * Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+		 */
+
+		PendingIntent notifyPendingIntent = PendingIntent.getActivity(this, 0,
+		    notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
 		    .setSmallIcon(R.drawable.ic_launcher).setContentTitle(title)
 		    .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
 		    .setContentText(msg);
 
-		mBuilder.setContentIntent(contentIntent);
+		mBuilder.setContentIntent(notifyPendingIntent);
+
 		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
 	}
 }

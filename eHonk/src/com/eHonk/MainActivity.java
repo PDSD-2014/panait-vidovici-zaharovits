@@ -1,8 +1,8 @@
 package com.eHonk;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Locale;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eHonk.R;
+import com.eHonk.Constants;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -46,16 +47,19 @@ public class MainActivity extends ActionBarActivity {
 
 	private static final int ENABLE_NETWORK_REQUEST = 1;
 
-	private static final int MAX_ATTEMPTS = 5;
-	private static final int BACKOFF_MILLI_SECONDS = 1000;
-	private static final Random random = new Random();
-
 	private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	private static final String PROPERTY_IS_REGISTERED = "is_registered";
 	private static final String PROPERTY_IS_DRIVER = "is_driver";
-	private static final String PROPERTY_APP_VERSION = "app_version"; 	/* change this for new releases so that apps re-register to GCM */
-	
-	public static final String TAG = "eHonk GCM";
+	private static final String PROPERTY_APP_VERSION = "app_version"; /*
+																																		 * change
+																																		 * this for
+																																		 * new
+																																		 * releases
+																																		 * so that
+																																		 * apps
+																																		 * re-register
+																																		 * to GCM
+																																		 */
 
 	private AsyncTask<Void, Void, Boolean> gcmRegisterTask = null;
 
@@ -100,7 +104,7 @@ public class MainActivity extends ActionBarActivity {
 				}
 			}
 		} else {
-			Log.i(TAG, "No valid Google Play Services APK found.");
+			Log.i(Constants.TAG, "No valid Google Play Services APK found.");
 		}
 	}
 
@@ -156,10 +160,10 @@ public class MainActivity extends ActionBarActivity {
 
 				boolean has_registered = false;
 
-				long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
+				long backoff = Constants.BACKOFF_MILLI_SECONDS + Constants.random.nextInt(1000);
 
-				for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-					Log.d(TAG, "Attempt #" + i + " to register");
+				for (int i = 1; i <= Constants.MAX_ATTEMPTS; i++) {
+					Log.d(Constants.TAG, "Attempt #" + i + " to register");
 
 					try {
 						if (gcm == null) {
@@ -172,16 +176,16 @@ public class MainActivity extends ActionBarActivity {
 
 						has_registered = true;
 					} catch (IOException ex) {
-						Log.e(TAG, "Failed to register on attempt " + i + ":" + ex);
-						if (i == MAX_ATTEMPTS) {
+						Log.e(Constants.TAG, "Failed to register on attempt " + i + ":" + ex);
+						if (i == Constants.MAX_ATTEMPTS) {
 							break;
 						}
 						try {
-							Log.d(TAG, "Sleeping for " + backoff + " ms before retry");
+							Log.d(Constants.TAG, "Sleeping for " + backoff + " ms before retry");
 							Thread.sleep(backoff);
 						} catch (InterruptedException e1) {
 							// Activity finished before we complete - exit.
-							Log.d(TAG, "Thread interrupted: abort remaining retries!");
+							Log.d(Constants.TAG, "Thread interrupted: abort remaining retries!");
 							Thread.currentThread().interrupt();
 							has_registered = false;
 						}
@@ -213,7 +217,7 @@ public class MainActivity extends ActionBarActivity {
 				GooglePlayServicesUtil.getErrorDialog(resultCode, this,
 				    PLAY_SERVICES_RESOLUTION_REQUEST).show();
 			} else {
-				Log.i(TAG, "This device is not supported.");
+				Log.i(Constants.TAG, "This device is not supported.");
 				finish();
 			}
 			return false;
@@ -226,7 +230,7 @@ public class MainActivity extends ActionBarActivity {
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
 		String registrationId = prefs.getString(Constants.PROPERTY_GCM_REG_ID, "");
 		if (registrationId.isEmpty()) {
-			Log.i(TAG, "Registration not found.");
+			Log.i(Constants.TAG, "Registration not found.");
 			return "";
 		}
 		// Check if app was updated; if so, it must clear the registration ID
@@ -236,7 +240,7 @@ public class MainActivity extends ActionBarActivity {
 		    Integer.MIN_VALUE);
 		int currentVersion = getAppVersion(context);
 		if (registeredVersion != currentVersion) {
-			Log.i(TAG, "App version changed.");
+			Log.i(Constants.TAG, "App version changed.");
 			return "";
 		}
 		return registrationId;
@@ -265,7 +269,7 @@ public class MainActivity extends ActionBarActivity {
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
 		int appVersion = getAppVersion(context);
 
-		Log.i(TAG, "Saving regId on app version " + appVersion);
+		Log.i(Constants.TAG, "Saving regId on app version " + appVersion);
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString(Constants.PROPERTY_GCM_REG_ID, regid);
 		editor.putInt(PROPERTY_APP_VERSION, appVersion);
@@ -345,7 +349,7 @@ public class MainActivity extends ActionBarActivity {
 							        Bundle data = new Bundle();
 							        final String license_plate = mActivity
 							            .getRegistrationLicense();
-							        data.putString(Constants.PROPERTY_LICENSE_PLATE,
+							        data.putString(Constants.PROPERTY_OFFENDED_LICENSE_PLATE,
 							            license_plate);
 							        final String offender_license_plate = editText.getText()
 							            .toString();
@@ -353,15 +357,17 @@ public class MainActivity extends ActionBarActivity {
 							            offender_license_plate);
 							        data.putString(Constants.PROPERTY_MESSAGE_TYPE,
 							            Constants.LABEL_NOTIFY_MESSAGE);
+							        data.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
+							            Constants.iso8601Format.format(new Date()));
 
-							        long backoff = BACKOFF_MILLI_SECONDS
-							            + random.nextInt(1000);
+							        long backoff = Constants.BACKOFF_MILLI_SECONDS
+							            + Constants.random.nextInt(1000);
 							        final String msgId = Constants.LABEL_NOTIFY_MESSAGE
 							            + mActivity.msgId.incrementAndGet();
 
-							        for (int i = 1; i <= MAX_ATTEMPTS; i++) {
+							        for (int i = 1; i <= Constants.MAX_ATTEMPTS; i++) {
 
-								        Log.d(TAG, "Attempt #" + i + " to send msgId: " + msgId);
+								        Log.d(Constants.TAG, "Attempt #" + i + " to send msgId: " + msgId);
 
 								        try {
 									        mActivity.gcm.send(
@@ -370,17 +376,17 @@ public class MainActivity extends ActionBarActivity {
 
 									        return true;
 								        } catch (IOException e) {
-									        Log.e(TAG, "Failed to send on attempt " + i + ":" + e);
-									        if (i == MAX_ATTEMPTS) {
+									        Log.e(Constants.TAG, "Failed to send on attempt " + i + ":" + e);
+									        if (i == Constants.MAX_ATTEMPTS) {
 										        break;
 									        }
 									        try {
-										        Log.d(TAG, "Sleeping for " + backoff
+										        Log.d(Constants.TAG, "Sleeping for " + backoff
 										            + " ms before retry");
 										        Thread.sleep(backoff);
 									        } catch (InterruptedException e1) {
 										        // Activity finished before we complete - exit.
-										        Log.d(TAG,
+										        Log.d(Constants.TAG,
 										            "Thread interrupted: abort remaining retries!");
 										        Thread.currentThread().interrupt();
 										        return false;
@@ -468,7 +474,7 @@ public class MainActivity extends ActionBarActivity {
 								/* wait for gcm request to finish */
 								gcmRegisterTask.get();
 							} catch (InterruptedException | ExecutionException e) {
-								Log.i(TAG, "Registration failed.");
+								Log.i(Constants.TAG, "Registration failed.");
 								return false;
 							}
 						}
@@ -491,12 +497,12 @@ public class MainActivity extends ActionBarActivity {
 							    Constants.LABEL_REGISTER_MESSAGE);
 						}
 
-						long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
+						long backoff = Constants.BACKOFF_MILLI_SECONDS + Constants.random.nextInt(1000);
 						final String msgIdString = Constants.LABEL_REGISTER_MESSAGE
 						    + msgId.incrementAndGet();
 
-						for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-							Log.d(TAG, "Attempt #" + i + " to send msgId: " + msgIdString);
+						for (int i = 1; i <= Constants.MAX_ATTEMPTS; i++) {
+							Log.d(Constants.TAG, "Attempt #" + i + " to send msgId: " + msgIdString);
 
 							try {
 								/* send registration id to backend */
@@ -508,16 +514,16 @@ public class MainActivity extends ActionBarActivity {
 
 								return true;
 							} catch (IOException e) {
-								Log.e(TAG, "Failed to send on attempt " + i + ":" + e);
-								if (i == MAX_ATTEMPTS) {
+								Log.e(Constants.TAG, "Failed to send on attempt " + i + ":" + e);
+								if (i == Constants.MAX_ATTEMPTS) {
 									break;
 								}
 								try {
-									Log.d(TAG, "Sleeping for " + backoff + " ms before retry");
+									Log.d(Constants.TAG, "Sleeping for " + backoff + " ms before retry");
 									Thread.sleep(backoff);
 								} catch (InterruptedException e1) {
 									// Activity finished before we complete - exit.
-									Log.d(TAG, "Thread interrupted: abort remaining retries!");
+									Log.d(Constants.TAG, "Thread interrupted: abort remaining retries!");
 									Thread.currentThread().interrupt();
 									return false;
 								}
@@ -595,10 +601,10 @@ public class MainActivity extends ActionBarActivity {
 					data.putString(Constants.PROPERTY_MESSAGE_TYPE,
 					    Constants.LABEL_NODRIVER_MESSAGE);
 
-					long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
+					long backoff = Constants.BACKOFF_MILLI_SECONDS + Constants.random.nextInt(1000);
 
-					for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-						Log.d(TAG, "Attempt #" + i + " to register");
+					for (int i = 1; i <= Constants.MAX_ATTEMPTS; i++) {
+						Log.d(Constants.TAG, "Attempt #" + i + " to register");
 
 						try {
 							/* send registration id to backend */
@@ -608,16 +614,16 @@ public class MainActivity extends ActionBarActivity {
 
 							return true;
 						} catch (IOException e) {
-							Log.e(TAG, "Failed to register on attempt " + i + ":" + e);
-							if (i == MAX_ATTEMPTS) {
+							Log.e(Constants.TAG, "Failed to register on attempt " + i + ":" + e);
+							if (i == Constants.MAX_ATTEMPTS) {
 								break;
 							}
 							try {
-								Log.d(TAG, "Sleeping for " + backoff + " ms before retry");
+								Log.d(Constants.TAG, "Sleeping for " + backoff + " ms before retry");
 								Thread.sleep(backoff);
 							} catch (InterruptedException e1) {
 								// Activity finished before we complete - exit.
-								Log.d(TAG, "Thread interrupted: abort remaining retries!");
+								Log.d(Constants.TAG, "Thread interrupted: abort remaining retries!");
 								Thread.currentThread().interrupt();
 								return false;
 							}
@@ -706,7 +712,7 @@ public class MainActivity extends ActionBarActivity {
 			public void onClick(View onClick) {
 				/* this wil be overwritten */
 				if (isOnline()) {
-					if(getRegistrationId(context).isEmpty())
+					if (getRegistrationId(context).isEmpty())
 						gcmRegisterTask = registerInBackground();
 					alert.dismiss();
 				}

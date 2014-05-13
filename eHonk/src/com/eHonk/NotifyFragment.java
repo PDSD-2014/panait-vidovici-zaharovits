@@ -1,7 +1,5 @@
 package com.eHonk;
 
-import java.io.IOException;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -66,15 +64,16 @@ public class NotifyFragment extends Fragment {
 					
 					@Override
 					public void onClick(View v) {
+						/*
 						try {
 							mActivity.gcm.send(
 									mActivity.getApplicationContext().getString(R.string.sender_id)
 											+ "@gcm.googleapis.com",
 									""+mActivity.msgId.incrementAndGet(), new Bundle());
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						*/
 						new MainActivity.StuckDialogFragment().show(mActivity.getSupportFragmentManager(), "stuck");
 					}
 				});

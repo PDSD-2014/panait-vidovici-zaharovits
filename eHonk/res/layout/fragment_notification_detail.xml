@@ -1,0 +1,56 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.eHonk.NotificationDetailActivity$PlaceholderFragment" >
+
+    <TextView
+        android:id="@+id/recvNotificationDetail1"
+        style="@style/eHonkTextStyle2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="@string/recv_notification_title21" />
+
+    <TextView
+        android:id="@+id/recvNotificationDetail2"
+        style="@style/eHonkButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:visibility="gone" />
+    
+    <TextView
+        android:id="@+id/recvNotificationDetail3"
+        style="@style/eHonkTextStyle2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginBottom="5dp"
+        android:text="@string/recv_notification_title12" />
+    
+    <Button 
+        android:id="@+id/yesButton"
+        style="@style/eHonkButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/yes_button_text"
+        android:layout_marginBottom="15dp"
+        />
+        
+    <Button 
+        android:id="@+id/noButton"
+        style="@style/eHonkButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_button_text"
+        />
+
+</LinearLayout>

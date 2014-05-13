@@ -16,6 +16,8 @@
 
 package com.eHonk.server;
 
+import com.eHonk.server.Constants;
+
 public class ProcessorFactory {
 
 	private static final String PACKAGE = "com.eHonk";
@@ -33,6 +35,8 @@ public class ProcessorFactory {
 			return new NoDriverRegisterProcessor();
 		} else if (action.equals(Constants.LABEL_NOTIFY_MESSAGE)) {
 			return new NotifyProcessor();
+		} else if (action.equals(Constants.LABEL_NOTIFY_RESPONSE_MESSAGE)) {
+			return new ResponseProcessor();
 		} else if (action.equals(ACTION_ECHO)) {
 			return new EchoProcessor();
 		}

@@ -20,19 +20,28 @@
     <string name="register_menu">Hi, what\'s your car?</string>
     <string name="notify">Notify</string>
     <string name="cancel">Cancel</string>
-    <string name="failed_to_register_alert_title">Failed to connect</string>
+    <string name="failed_to_register_alert_title">Failed to connect.</string>
     <string name="failed_to_register_alert_message">The service is unavailable.\nPlease try again later!</string>
     <string name="needs_internet_alert_message">You need a network connection to use this application.\nPlease turn on mobile network or Wi-Fi in Settings.</string>
     <string name="needs_internet_alert_title">Unable to connect.</string>
-    
-    <string name="ehonk_notification_title">Hurry up!</string> <!--  alerted driver notification -->
-    <string name="offense_notification_content1">You are blocking anonymous driver</string>
-    <string name="offense_notification_content2">You are blocking driver</string>
-    
+    <string name="ehonk_notification_title">Hurry up!</string> <!-- alerted driver notification -->
+    <string name="offense_notification_content1">You are blocking anonymous driver.</string>
+    <string name="offense_notification_content2">You are blocking driver.</string>
     <string name="ehonk_notification_title2">We are sorry!</string> <!-- driver is unregistered -->
-    <string name="offense_notification_content3">Driver %s is not using eHonk</string>
-    
+    <string name="offense_notification_content3">Driver %s is not using eHonk.</string>
     <string name="ehonk_notification_title3">Notification sent!</string> <!-- one or more drivers have been alerted -->
-    <string name="offense_notification_content4">eHonk notified %s drivers</string>
+    <string name="offense_notification_content4">eHonk notified %s drivers.</string>
+    <string name="title_activity_notification_detail">Hurry up!</string>
+    <string name="recv_notification_title11">Driver of</string>
+    <string name="recv_notification_title21">Anonymous driver</string>
+    <string name="recv_notification_title12">is asking to please move your car!</string>
+    <string name="yes_button_text">Coming</string>
+    <string name="no_button_text">Ignore</string>
+    
+    <string name="ehonk_notification_title4">Good news!</string> <!-- one driver responded -->
+    <string name="yes_response_notification">Driver %s is coming to move his car.</string>
 
+    <string name="ehonk_notification_title5">Bad news!</string> <!-- one driver responded -->
+    <string name="no_response_notification">Driver %s ignored you.</string>
+    
 </resources>
