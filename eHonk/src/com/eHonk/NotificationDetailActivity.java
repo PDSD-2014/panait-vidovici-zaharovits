@@ -1,6 +1,8 @@
 package com.eHonk;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -81,8 +83,17 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					Activity activity = PlaceholderFragment.this.getActivity();
 					Context context = activity.getApplicationContext();
 					GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(activity);
-					
+
 					/* check time here */
+					try {
+						String timestamp = data.getString(Constants.PROPERTY_OFFENSE_TIMESTAMP);
+						Date offense_date = Constants.iso8601Format.parse(timestamp);
+						long endTime = offense_date.getTime() + Constants.TIMEOUT;
+						if(System.currentTimeMillis() > endTime)
+							return false;
+					} catch (ParseException e2) {
+						e2.printStackTrace();
+					}
 
 					long backoff = Constants.BACKOFF_MILLI_SECONDS
 					    + Constants.random.nextInt(1000);
@@ -173,12 +184,16 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					Bundle bundle = new Bundle();
 					bundle.putString(Constants.PROPERTY_MESSAGE_TYPE,
 					    Constants.LABEL_NOTIFY_RESPONSE_MESSAGE);
-					bundle.putString(Constants.PROPERTY_RESPONSE_TYPE, Constants.VALUE_RESPONSE_IGNORE);
+					bundle.putString(Constants.PROPERTY_RESPONSE_TYPE,
+					    Constants.VALUE_RESPONSE_IGNORE);
 					bundle.putString(
 					    Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 					    getArguments().getString(
 					        Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
-					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments().getString(Constants.PROPERTY_OFFENDED_GCM_ID));
+					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments()
+					    .getString(Constants.PROPERTY_OFFENDED_GCM_ID));
+					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP, getArguments()
+					    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
 					sendResponseToOffended(bundle);
 				}
 			});
@@ -190,12 +205,16 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					Bundle bundle = new Bundle();
 					bundle.putString(Constants.PROPERTY_MESSAGE_TYPE,
 					    Constants.LABEL_NOTIFY_RESPONSE_MESSAGE);
-					bundle.putString(Constants.PROPERTY_RESPONSE_TYPE, Constants.VALUE_RESPONSE_COMING);
+					bundle.putString(Constants.PROPERTY_RESPONSE_TYPE,
+					    Constants.VALUE_RESPONSE_COMING);
 					bundle.putString(
 					    Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 					    getArguments().getString(
 					        Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
-					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments().getString(Constants.PROPERTY_OFFENDED_GCM_ID));
+					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments()
+					    .getString(Constants.PROPERTY_OFFENDED_GCM_ID));
+					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP, getArguments()
+					    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
 					sendResponseToOffended(bundle);
 				}
 			});
