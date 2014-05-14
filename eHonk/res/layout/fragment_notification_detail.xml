@@ -46,6 +46,7 @@
         android:max="100"
         android:minHeight="8dp"
         android:minWidth="200dp"
+        android:progressDrawable="@drawable/progress_bar"
         android:progress="67" />
 
     <Button
