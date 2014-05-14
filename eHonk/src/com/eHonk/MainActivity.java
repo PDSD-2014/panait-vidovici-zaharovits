@@ -83,6 +83,7 @@ public class MainActivity extends ActionBarActivity {
 
 		context = getApplicationContext();
 
+		
 		if (!isOnline(MainActivity.this)) {
 			createNetErrorDialog();
 		}

@@ -46,7 +46,7 @@
         android:max="100"
         android:minHeight="8dp"
         android:minWidth="200dp"
-        android:progress="100" />
+        android:progress="67" />
 
     <Button
         android:id="@+id/yesButton"

@@ -44,4 +44,6 @@
     <string name="ehonk_notification_title5">Bad news!</string> <!-- one driver responded -->
     <string name="no_response_notification">Driver %s ignored you.</string>
     
+    <string name="ehonk_notifications_expired_toast">Notifications have expired.</string>
+    
 </resources>

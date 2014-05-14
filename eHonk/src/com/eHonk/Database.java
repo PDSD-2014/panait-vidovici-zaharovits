@@ -291,7 +291,7 @@ public class Database extends SQLiteOpenHelper {
 		
 		SQLiteDatabase db = this.getWritableDatabase();
 		db.delete(table_name, NOTIFICATIONS_LOG_ID + " = ?",
-		    new String[] { offense.getGcmId() });
+		    new String[] { ""+offense.getNotificationId() });
 		db.close();
 	}
 

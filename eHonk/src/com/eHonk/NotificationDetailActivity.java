@@ -67,8 +67,60 @@ public class NotificationDetailActivity extends ActionBarActivity {
 	public static class PlaceholderFragment extends Fragment {
 
 		final AtomicInteger msgId = new AtomicInteger();
+		Database.OffenseRecord offense = getNextOffense(getActivity());
+		
+		private static Database.OffenseRecord getNextOffense(Context context) {
+			
+			Database db = Database.getInstance(context);
+			Database.OffenseRecord offense = null;
 
-		public PlaceholderFragment() {
+			db.lock.lock();
+
+			try {
+				offense = db.getLastOffenses(
+				    Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV,
+				    Constants.iso8601Format.format(new Date(System.currentTimeMillis()
+				        - Constants.TIMEOUT)));
+
+				if (offense == null)
+					return null;
+
+				db.removeOffense(Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV, offense);
+
+			} finally {
+				db.lock.unlock();
+			}
+			
+			return offense;
+		}
+		
+		private void showOffense(View rootView, Database.OffenseRecord offense) {
+
+			if(offense==null) {
+				/* show Toast and close activity */
+				Toast.makeText(getActivity(), getActivity().getString(R.string.ehonk_notifications_expired_toast),
+				    Toast.LENGTH_LONG).show();
+				getActivity().finish();
+				return;
+			}
+			
+			final String offended_license_plate = offense.getLicense();
+			
+			TextView twNotificationDetail1 = (TextView) rootView
+			    .findViewById(R.id.recvNotificationDetail1);
+			TextView twNotificationDetail2 = (TextView) rootView
+			    .findViewById(R.id.recvNotificationDetail2);
+			
+			if (offended_license_plate.isEmpty()) {
+				twNotificationDetail1.setText(getActivity().getApplicationContext()
+				    .getString(R.string.recv_notification_title21));
+				twNotificationDetail2.setVisibility(View.GONE);
+			} else {
+				twNotificationDetail1.setText(getActivity().getApplicationContext()
+				    .getString(R.string.recv_notification_title11));
+				twNotificationDetail2.setVisibility(View.VISIBLE);
+				twNotificationDetail2.setText(offended_license_plate);
+			}
 		}
 
 		private void sendResponseToOffended(Bundle bundle) {
@@ -151,40 +203,10 @@ public class NotificationDetailActivity extends ActionBarActivity {
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 		    Bundle savedInstanceState) {
 
-			View rootView = inflater.inflate(R.layout.fragment_notification_detail,
+			final View rootView = inflater.inflate(R.layout.fragment_notification_detail,
 			    container, false);
 
-			Database db = Database.getInstance(getActivity());
-			Database.OffenseRecord offense = null;
-
-			db.lock.lock();
-
-			try {
-				offense = db.getLastOffenses(
-				    Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV,
-				    Constants.iso8601Format.format(new Date(System.currentTimeMillis()
-				        - Constants.TIMEOUT)));
-
-				if (offense == null)
-					return rootView;
-
-				db.removeOffense(Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV, offense);
-
-			} finally {
-				db.lock.unlock();
-			}
-
-			final String offended_license_plate = offense.getLicense();
-			if (!offended_license_plate.isEmpty()) {
-				TextView twNotificationDetail1 = (TextView) rootView
-				    .findViewById(R.id.recvNotificationDetail1);
-				twNotificationDetail1.setText(getActivity().getApplicationContext()
-				    .getString(R.string.recv_notification_title11));
-				TextView twNotificationDetail2 = (TextView) rootView
-				    .findViewById(R.id.recvNotificationDetail2);
-				twNotificationDetail2.setVisibility(View.VISIBLE);
-				twNotificationDetail2.setText(offended_license_plate);
-			}
+			showOffense(rootView, this.offense);
 
 			Button btnYes = (Button) rootView.findViewById(R.id.yesButton);
 			Button btnNo = (Button) rootView.findViewById(R.id.noButton);
@@ -192,7 +214,6 @@ public class NotificationDetailActivity extends ActionBarActivity {
 			/* get my license_plate (OFFENDER) */
 			final String license_plate = MainActivity
 			    .getRegistrationLicense(getActivity());
-			final Database.OffenseRecord offense_copy = offense;
 
 			btnNo.setOnClickListener(new View.OnClickListener() {
 
@@ -206,10 +227,16 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					bundle.putString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 					    license_plate);
 					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID,
-					    offense_copy.getGcmId());
+					    offense.getGcmId());
 					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
-					    offense_copy.getTimestamp());
+					    offense.getTimestamp());
+					
 					sendResponseToOffended(bundle);
+					
+					PlaceholderFragment.this.offense = getNextOffense(getActivity());
+					if(PlaceholderFragment.this.offense==null)
+						getActivity().finish();
+					showOffense(rootView, PlaceholderFragment.this.offense);
 				}
 			});
 
@@ -225,60 +252,19 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					bundle.putString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 					    license_plate);
 					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID,
-					    offense_copy.getGcmId());
+					    offense.getGcmId());
 					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
-					    offense_copy.getTimestamp());
+					    offense.getTimestamp());
+					
 					sendResponseToOffended(bundle);
+					
+					PlaceholderFragment.this.offense = getNextOffense(getActivity());
+					if(PlaceholderFragment.this.offense==null)
+						getActivity().finish();
+					showOffense(rootView, PlaceholderFragment.this.offense);
 				}
 			});
 
-			/*
-			 * Bundle bundle = getArguments();
-			 * 
-			 * String license_plate = bundle
-			 * .getString(Constants.PROPERTY_OFFENDED_LICENSE_PLATE); if
-			 * (!license_plate.isEmpty()) { TextView twNotificationDetail1 =
-			 * (TextView) rootView .findViewById(R.id.recvNotificationDetail1);
-			 * twNotificationDetail1.setText(getActivity().getApplicationContext()
-			 * .getString(R.string.recv_notification_title11)); TextView
-			 * twNotificationDetail2 = (TextView) rootView
-			 * .findViewById(R.id.recvNotificationDetail2);
-			 * twNotificationDetail2.setVisibility(View.VISIBLE);
-			 * twNotificationDetail2.setText(license_plate); }
-			 * 
-			 * Button btnYes = (Button) rootView.findViewById(R.id.yesButton); Button
-			 * btnNo = (Button) rootView.findViewById(R.id.noButton);
-			 * 
-			 * btnNo.setOnClickListener(new View.OnClickListener() {
-			 * 
-			 * @Override public void onClick(View v) { Bundle bundle = new Bundle();
-			 * bundle.putString(Constants.PROPERTY_MESSAGE_TYPE,
-			 * Constants.LABEL_NOTIFY_RESPONSE_MESSAGE);
-			 * bundle.putString(Constants.PROPERTY_RESPONSE_TYPE,
-			 * Constants.VALUE_RESPONSE_IGNORE); bundle.putString(
-			 * Constants.PROPERTY_OFFENDER_LICENSE_PLATE, getArguments().getString(
-			 * Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
-			 * bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments()
-			 * .getString(Constants.PROPERTY_OFFENDED_GCM_ID));
-			 * bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP, getArguments()
-			 * .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
-			 * sendResponseToOffended(bundle); } });
-			 * 
-			 * btnYes.setOnClickListener(new View.OnClickListener() {
-			 * 
-			 * @Override public void onClick(View v) { Bundle bundle = new Bundle();
-			 * bundle.putString(Constants.PROPERTY_MESSAGE_TYPE,
-			 * Constants.LABEL_NOTIFY_RESPONSE_MESSAGE);
-			 * bundle.putString(Constants.PROPERTY_RESPONSE_TYPE,
-			 * Constants.VALUE_RESPONSE_COMING); bundle.putString(
-			 * Constants.PROPERTY_OFFENDER_LICENSE_PLATE, getArguments().getString(
-			 * Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
-			 * bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments()
-			 * .getString(Constants.PROPERTY_OFFENDED_GCM_ID));
-			 * bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP, getArguments()
-			 * .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
-			 * sendResponseToOffended(bundle); } });
-			 */
 
 			return rootView;
 		}
