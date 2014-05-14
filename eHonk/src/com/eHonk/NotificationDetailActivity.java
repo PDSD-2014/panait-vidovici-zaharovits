@@ -13,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -35,10 +36,8 @@ public class NotificationDetailActivity extends ActionBarActivity {
 		setContentView(R.layout.activity_notification_detail);
 
 		if (savedInstanceState == null) {
-			PlaceholderFragment fragment = new PlaceholderFragment();
-			fragment.setArguments(getIntent().getExtras());
 			getSupportFragmentManager().beginTransaction()
-			    .add(R.id.container, fragment).commit();
+			    .add(R.id.container, new PlaceholderFragment()).commit();
 		}
 	}
 
@@ -86,10 +85,11 @@ public class NotificationDetailActivity extends ActionBarActivity {
 
 					/* check time here */
 					try {
-						String timestamp = data.getString(Constants.PROPERTY_OFFENSE_TIMESTAMP);
+						String timestamp = data
+						    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP);
 						Date offense_date = Constants.iso8601Format.parse(timestamp);
 						long endTime = offense_date.getTime() + Constants.TIMEOUT;
-						if(System.currentTimeMillis() > endTime)
+						if (System.currentTimeMillis() > endTime)
 							return false;
 					} catch (ParseException e2) {
 						e2.printStackTrace();
@@ -143,12 +143,6 @@ public class NotificationDetailActivity extends ActionBarActivity {
 						Toast.makeText(getActivity().getApplicationContext(),
 						    "Message failed to send!", Toast.LENGTH_LONG).show();
 					}
-					/* first stop service, to process another message */
-					Intent serviceIntent = new Intent(getActivity(),
-					    NotificationRecvIntentService.class);
-					getActivity().stopService(serviceIntent);
-					/* cancel activity */
-					getActivity().finish();
 				}
 			}.execute(null, null, null);
 		}
@@ -156,14 +150,32 @@ public class NotificationDetailActivity extends ActionBarActivity {
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 		    Bundle savedInstanceState) {
+
 			View rootView = inflater.inflate(R.layout.fragment_notification_detail,
 			    container, false);
 
-			Bundle bundle = getArguments();
+			Database db = Database.getInstance(getActivity());
+			Database.OffenseRecord offense = null;
 
-			String license_plate = bundle
-			    .getString(Constants.PROPERTY_OFFENDED_LICENSE_PLATE);
-			if (!license_plate.isEmpty()) {
+			db.lock.lock();
+
+			try {
+				offense = db.getLastOffenses(
+				    Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV,
+				    Constants.iso8601Format.format(new Date(System.currentTimeMillis()
+				        - Constants.TIMEOUT)));
+
+				if (offense == null)
+					return rootView;
+
+				db.removeOffense(Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV, offense);
+
+			} finally {
+				db.lock.unlock();
+			}
+
+			final String offended_license_plate = offense.getLicense();
+			if (!offended_license_plate.isEmpty()) {
 				TextView twNotificationDetail1 = (TextView) rootView
 				    .findViewById(R.id.recvNotificationDetail1);
 				twNotificationDetail1.setText(getActivity().getApplicationContext()
@@ -171,11 +183,16 @@ public class NotificationDetailActivity extends ActionBarActivity {
 				TextView twNotificationDetail2 = (TextView) rootView
 				    .findViewById(R.id.recvNotificationDetail2);
 				twNotificationDetail2.setVisibility(View.VISIBLE);
-				twNotificationDetail2.setText(license_plate);
+				twNotificationDetail2.setText(offended_license_plate);
 			}
 
 			Button btnYes = (Button) rootView.findViewById(R.id.yesButton);
 			Button btnNo = (Button) rootView.findViewById(R.id.noButton);
+
+			/* get my license_plate (OFFENDER) */
+			final String license_plate = MainActivity
+			    .getRegistrationLicense(getActivity());
+			final Database.OffenseRecord offense_copy = offense;
 
 			btnNo.setOnClickListener(new View.OnClickListener() {
 
@@ -186,14 +203,12 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					    Constants.LABEL_NOTIFY_RESPONSE_MESSAGE);
 					bundle.putString(Constants.PROPERTY_RESPONSE_TYPE,
 					    Constants.VALUE_RESPONSE_IGNORE);
-					bundle.putString(
-					    Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
-					    getArguments().getString(
-					        Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
-					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments()
-					    .getString(Constants.PROPERTY_OFFENDED_GCM_ID));
-					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP, getArguments()
-					    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+					bundle.putString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
+					    license_plate);
+					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID,
+					    offense_copy.getGcmId());
+					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
+					    offense_copy.getTimestamp());
 					sendResponseToOffended(bundle);
 				}
 			});
@@ -207,17 +222,63 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					    Constants.LABEL_NOTIFY_RESPONSE_MESSAGE);
 					bundle.putString(Constants.PROPERTY_RESPONSE_TYPE,
 					    Constants.VALUE_RESPONSE_COMING);
-					bundle.putString(
-					    Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
-					    getArguments().getString(
-					        Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
-					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments()
-					    .getString(Constants.PROPERTY_OFFENDED_GCM_ID));
-					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP, getArguments()
-					    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+					bundle.putString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
+					    license_plate);
+					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID,
+					    offense_copy.getGcmId());
+					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
+					    offense_copy.getTimestamp());
 					sendResponseToOffended(bundle);
 				}
 			});
+
+			/*
+			 * Bundle bundle = getArguments();
+			 * 
+			 * String license_plate = bundle
+			 * .getString(Constants.PROPERTY_OFFENDED_LICENSE_PLATE); if
+			 * (!license_plate.isEmpty()) { TextView twNotificationDetail1 =
+			 * (TextView) rootView .findViewById(R.id.recvNotificationDetail1);
+			 * twNotificationDetail1.setText(getActivity().getApplicationContext()
+			 * .getString(R.string.recv_notification_title11)); TextView
+			 * twNotificationDetail2 = (TextView) rootView
+			 * .findViewById(R.id.recvNotificationDetail2);
+			 * twNotificationDetail2.setVisibility(View.VISIBLE);
+			 * twNotificationDetail2.setText(license_plate); }
+			 * 
+			 * Button btnYes = (Button) rootView.findViewById(R.id.yesButton); Button
+			 * btnNo = (Button) rootView.findViewById(R.id.noButton);
+			 * 
+			 * btnNo.setOnClickListener(new View.OnClickListener() {
+			 * 
+			 * @Override public void onClick(View v) { Bundle bundle = new Bundle();
+			 * bundle.putString(Constants.PROPERTY_MESSAGE_TYPE,
+			 * Constants.LABEL_NOTIFY_RESPONSE_MESSAGE);
+			 * bundle.putString(Constants.PROPERTY_RESPONSE_TYPE,
+			 * Constants.VALUE_RESPONSE_IGNORE); bundle.putString(
+			 * Constants.PROPERTY_OFFENDER_LICENSE_PLATE, getArguments().getString(
+			 * Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
+			 * bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments()
+			 * .getString(Constants.PROPERTY_OFFENDED_GCM_ID));
+			 * bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP, getArguments()
+			 * .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+			 * sendResponseToOffended(bundle); } });
+			 * 
+			 * btnYes.setOnClickListener(new View.OnClickListener() {
+			 * 
+			 * @Override public void onClick(View v) { Bundle bundle = new Bundle();
+			 * bundle.putString(Constants.PROPERTY_MESSAGE_TYPE,
+			 * Constants.LABEL_NOTIFY_RESPONSE_MESSAGE);
+			 * bundle.putString(Constants.PROPERTY_RESPONSE_TYPE,
+			 * Constants.VALUE_RESPONSE_COMING); bundle.putString(
+			 * Constants.PROPERTY_OFFENDER_LICENSE_PLATE, getArguments().getString(
+			 * Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
+			 * bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID, getArguments()
+			 * .getString(Constants.PROPERTY_OFFENDED_GCM_ID));
+			 * bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP, getArguments()
+			 * .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+			 * sendResponseToOffended(bundle); } });
+			 */
 
 			return rootView;
 		}

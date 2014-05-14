@@ -15,7 +15,6 @@ public class NotifyFragment extends Fragment {
 	
 	@Override
 	public void onAttach(Activity activity) {
-		// TODO Auto-generated method stub
 		super.onAttach(activity);
 		mActivity = (MainActivity)activity;
 	}
@@ -45,7 +44,7 @@ public class NotifyFragment extends Fragment {
 			}
 		});
 
-		final String license = mActivity.getRegistrationLicense();
+		final String license = MainActivity.getRegistrationLicense(mActivity);
 
 		if (license.isEmpty()) {
 			textViewRegisterInfo.setText(mActivity.getString(R.string.no_vehicule));
@@ -59,21 +58,10 @@ public class NotifyFragment extends Fragment {
 
 		Button stuckButton = (Button) rootView.findViewById(R.id.stuck_button);
 		stuckButton
-				//.setOnClickListener(mActivity.new SendMessageListener());
 				.setOnClickListener(new View.OnClickListener() {
 					
 					@Override
 					public void onClick(View v) {
-						/*
-						try {
-							mActivity.gcm.send(
-									mActivity.getApplicationContext().getString(R.string.sender_id)
-											+ "@gcm.googleapis.com",
-									""+mActivity.msgId.incrementAndGet(), new Bundle());
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						*/
 						new MainActivity.StuckDialogFragment().show(mActivity.getSupportFragmentManager(), "stuck");
 					}
 				});

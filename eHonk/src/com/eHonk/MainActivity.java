@@ -83,7 +83,7 @@ public class MainActivity extends ActionBarActivity {
 
 		context = getApplicationContext();
 
-		if (!isOnline()) {
+		if (!isOnline(MainActivity.this)) {
 			createNetErrorDialog();
 		}
 
@@ -91,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
 			gcm = GoogleCloudMessaging.getInstance(this);
 			regid = getRegistrationId(context);
 
-			if (regid.isEmpty() && isOnline()) {
+			if (regid.isEmpty() && isOnline(MainActivity.this)) {
 				/* get RegisterId from cloud */
 				gcmRegisterTask = registerInBackground();
 			}
@@ -102,7 +102,7 @@ public class MainActivity extends ActionBarActivity {
 				ft1.add(R.id.container, new NotifyFragment(), "fragment_tag1");
 				// ft1.addToBackStack(null);
 				ft1.commit();
-				if (!isRegistered()) {
+				if (!isRegistered(MainActivity.this)) {
 					android.support.v4.app.FragmentTransaction ft2 = fm
 					    .beginTransaction();
 					ft2.replace(R.id.container, new RegisterFragment(), "fragment_tag2");
@@ -123,7 +123,7 @@ public class MainActivity extends ActionBarActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// Check which request we're responding to
 		if (requestCode == ENABLE_NETWORK_REQUEST) {
-			if (!isOnline()) {
+			if (!isOnline(MainActivity.this)) {
 				createNetErrorDialog();
 				Toast.makeText(getApplicationContext(),
 				    context.getString(R.string.needs_internet_alert_title),
@@ -232,8 +232,8 @@ public class MainActivity extends ActionBarActivity {
 		return true;
 	}
 
-	private String getRegistrationId(Context context) {
-		final SharedPreferences prefs = getSharedPreferences(
+	private static String getRegistrationId(Context context) {
+		final SharedPreferences prefs = context.getSharedPreferences(
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
 		String registrationId = prefs.getString(Constants.PROPERTY_GCM_REG_ID, "");
 		if (registrationId.isEmpty()) {
@@ -253,26 +253,26 @@ public class MainActivity extends ActionBarActivity {
 		return registrationId;
 	}
 
-	public boolean isRegistered() {
-		final SharedPreferences prefs = getSharedPreferences(
+	public static boolean isRegistered(Context context) {
+		final SharedPreferences prefs = context.getSharedPreferences(
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
 		return prefs.getBoolean(PROPERTY_IS_REGISTERED, false);
 	}
 
-	public boolean isOnline() {
-		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	public static boolean isOnline(Context context) {
+		ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 		return (networkInfo != null && networkInfo.isConnected());
 	}
 
-	private boolean isDriver() {
-		final SharedPreferences prefs = getSharedPreferences(
+	private static boolean isDriver(Context context) {
+		final SharedPreferences prefs = context.getSharedPreferences(
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
 		return prefs.getBoolean(PROPERTY_IS_DRIVER, false);
 	}
 
-	private void storeRegistrationId(Context context, String regid) {
-		final SharedPreferences prefs = getSharedPreferences(
+	private static void storeRegistrationId(Context context, String regid) {
+		final SharedPreferences prefs = context.getSharedPreferences(
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
 		int appVersion = getAppVersion(context);
 
@@ -283,8 +283,8 @@ public class MainActivity extends ActionBarActivity {
 		editor.commit();
 	}
 
-	private void storeRegistrationLicense(String license) {
-		final SharedPreferences prefs = getSharedPreferences(
+	private static void storeRegistrationLicense(Context context, String license) {
+		final SharedPreferences prefs = context.getSharedPreferences(
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
 
 		SharedPreferences.Editor editor = prefs.edit();
@@ -294,8 +294,8 @@ public class MainActivity extends ActionBarActivity {
 		editor.commit();
 	}
 
-	public String getRegistrationLicense() {
-		final SharedPreferences prefs = getSharedPreferences(
+	public static String getRegistrationLicense(Context context) {
+		final SharedPreferences prefs = context.getSharedPreferences(
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
 
 		String license_plate = prefs
@@ -354,8 +354,7 @@ public class MainActivity extends ActionBarActivity {
 						        protected Boolean doInBackground(Void... params) {
 
 							        Bundle data = new Bundle();
-							        final String license_plate = mActivity
-							            .getRegistrationLicense();
+							        final String license_plate = MainActivity.getRegistrationLicense(mActivity);
 							        data.putString(Constants.PROPERTY_OFFENDED_LICENSE_PLATE,
 							            license_plate);
 							        final String offender_license_plate = editText.getText()
@@ -496,7 +495,7 @@ public class MainActivity extends ActionBarActivity {
 
 						Bundle data = new Bundle();
 						data.putString(Constants.PROPERTY_LICENSE_PLATE, license_plate);
-						if (MainActivity.this.isRegistered()) {
+						if (MainActivity.isRegistered(MainActivity.this)) {
 							data.putString(Constants.PROPERTY_MESSAGE_TYPE,
 							    Constants.LABEL_CHANGEDRIVER_MESSAGE);
 						} else {
@@ -517,7 +516,7 @@ public class MainActivity extends ActionBarActivity {
 								    + "@gcm.googleapis.com", Constants.LABEL_REGISTER_MESSAGE
 								    + msgIdString, data);
 
-								storeRegistrationLicense(license_plate);
+								storeRegistrationLicense(MainActivity.this, license_plate);
 
 								return true;
 							} catch (IOException e) {
@@ -546,7 +545,7 @@ public class MainActivity extends ActionBarActivity {
 					protected void onPostExecute(Boolean msg) {
 						if (msg) {
 							Toast.makeText(getApplicationContext(),
-							    "Car " + getRegistrationLicense() + " registered!",
+							    "Car " + getRegistrationLicense(MainActivity.this) + " registered!",
 							    Toast.LENGTH_LONG).show();
 
 							// close Registration fragment
@@ -718,7 +717,7 @@ public class MainActivity extends ActionBarActivity {
 			@Override
 			public void onClick(View onClick) {
 				/* this wil be overwritten */
-				if (isOnline()) {
+				if (isOnline(MainActivity.this)) {
 					if (getRegistrationId(context).isEmpty())
 						gcmRegisterTask = registerInBackground();
 					alert.dismiss();

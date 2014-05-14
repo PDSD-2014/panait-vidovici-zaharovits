@@ -26,31 +26,41 @@
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:visibility="gone" />
-    
+
     <TextView
         android:id="@+id/recvNotificationDetail3"
         style="@style/eHonkTextStyle2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="10dp"
         android:layout_marginBottom="5dp"
+        android:padding="10dp"
         android:text="@string/recv_notification_title12" />
-    
-    <Button 
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="false"
+        android:layout_margin="10dp"
+        android:max="100"
+        android:minHeight="8dp"
+        android:minWidth="200dp"
+        android:progress="100" />
+
+    <Button
         android:id="@+id/yesButton"
         style="@style/eHonkButtonStyle1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/yes_button_text"
         android:layout_marginBottom="15dp"
-        />
-        
-    <Button 
+        android:text="@string/yes_button_text" />
+
+    <Button
         android:id="@+id/noButton"
         style="@style/eHonkButtonStyle1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/no_button_text"
-        />
+        android:text="@string/no_button_text" />
 
 </LinearLayout>

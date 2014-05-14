@@ -25,14 +25,13 @@ public class RegisterFragment extends Fragment {
 		final EditText editText = (EditText) rootView
 				.findViewById(R.id.editText_license_plate);
 
-		if (mActivity.isRegistered()) {
+		if (MainActivity.isRegistered(mActivity)) {
 			TextView registerMenuTextView = (TextView) rootView
 					.findViewById(R.id.textView_register_menu);
 			registerMenuTextView.setText(mActivity.context
 					.getString(R.string.change_license_title));
 
-			final String old_license_plate = mActivity
-					.getRegistrationLicense();
+			final String old_license_plate = MainActivity.getRegistrationLicense(mActivity);
 			editText.setText(old_license_plate);
 		}
 
