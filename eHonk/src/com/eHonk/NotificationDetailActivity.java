@@ -212,6 +212,48 @@ public class NotificationDetailActivity extends ActionBarActivity {
 				}
 			}.execute(null, null, null);
 		}
+		
+		@Override
+		public void onStart() {
+		  super.onStart();
+		  
+		  final ProgressBar prgBar = (ProgressBar) getView().findViewById(R.id.progressBar1);
+		  final int prgBarMax = prgBar.getMax();
+		  
+		  int totalMillis = 0;
+      try {
+      	totalMillis = (int)(Constants.iso8601Format.parse(offense.getTimestamp()).getTime() + Constants.TIMEOUT - System.currentTimeMillis()) - 3131;
+      } catch (ParseException e) {
+	      e.printStackTrace();
+      }
+			PlaceholderFragment.this.cdt = new CountDownTimer(totalMillis, 1000) { 
+
+        public void onTick(long millisUntilFinished) {
+            int progress = (int) ((millisUntilFinished * prgBarMax) / Constants.TIMEOUT);
+            prgBar.setProgress(progress);
+        }
+
+        public void onFinish() {
+        	/* update GUI , to show the next message */
+        	PlaceholderFragment.this.offense = getNextOffense(getActivity());
+        	showOffense(getView(), PlaceholderFragment.this.offense);
+        }
+			}.start();
+			
+			/* set current progress */
+			int initialProgress = (totalMillis * prgBarMax) / Constants.TIMEOUT;
+			prgBar.setProgress(initialProgress);
+		}
+		
+		@Override
+		public void onStop() {
+		  super.onStop();
+		  
+		  if(PlaceholderFragment.this.cdt!=null) {
+		  	PlaceholderFragment.this.cdt.cancel();
+		  	PlaceholderFragment.this.cdt= null;
+		  }
+		}
 
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -223,6 +265,7 @@ public class NotificationDetailActivity extends ActionBarActivity {
 			showOffense(rootView, this.offense);
 
 			/* set progress bar */
+			/*
 			final ProgressBar prgBar = (ProgressBar) rootView.findViewById(R.id.progressBar1);
 			final int prgBarMax = prgBar.getMax();
 			int totalMillis = 0;
@@ -239,15 +282,14 @@ public class NotificationDetailActivity extends ActionBarActivity {
         }
 
         public void onFinish() {
-        	/* update GUI , to show the next message */
         	PlaceholderFragment.this.offense = getNextOffense(getActivity());
         	showOffense(rootView, PlaceholderFragment.this.offense);
         }
 			}.start();
 			
-			/* set max */
 			int initialProgress = (totalMillis * prgBarMax) / Constants.TIMEOUT;
 			prgBar.setProgress(initialProgress);
+			*/
 			
 			/* set button actions */
 			Button btnYes = (Button) rootView.findViewById(R.id.yesButton);
