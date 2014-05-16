@@ -28,6 +28,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,10 +68,10 @@ public class GcmIntentService extends IntentService {
 			 */
 			if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
 				sendSimpleNotification("Send error: " + extras.toString(),
-				    "Error title");
+				    "Error title", null);
 			} else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
 				sendSimpleNotification(
-				    "Deleted messages on server: " + extras.toString(), "Error title");
+				    "Deleted messages on server: " + extras.toString(), "Error title", null);
 				/* if it's a regular GCM message, do some work. */
 			} else if (Constants.LABEL_NOTIFY_MESSAGE.equals(messageType)) {
 
@@ -215,7 +216,7 @@ public class GcmIntentService extends IntentService {
 				sendSimpleNotification(
 				    msg,
 				    getApplicationContext().getString(
-				        R.string.ehonk_notification_title2));
+				        R.string.ehonk_notification_title2), null);
 
 			} else if (Constants.LABEL_NOTIFYACK_MESSAGE.equals(messageType)) {
 				String msg;
@@ -230,7 +231,7 @@ public class GcmIntentService extends IntentService {
 				sendSimpleNotification(
 				    msg,
 				    getApplicationContext().getString(
-				        R.string.ehonk_notification_title3));
+				        R.string.ehonk_notification_title3), null);
 			} else if (Constants.LABEL_NOTIFY_RESPONSE_MESSAGE.equals(messageType)) {
 				String msg = "", title = "";
 				final String response = extras
@@ -251,7 +252,8 @@ public class GcmIntentService extends IntentService {
 					    R.string.ehonk_notification_title5);
 				}
 
-				sendSimpleNotification(msg, title);
+				Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+				sendSimpleNotification(msg, title, alarmSound);
 
 			} else {
 				Log.i(Constants.TAG, "Received message: " + extras.toString());
@@ -262,7 +264,7 @@ public class GcmIntentService extends IntentService {
 	}
 
 	/* no rings no vibrate notification */
-	private void sendSimpleNotification(String msg, String title) {
+	private void sendSimpleNotification(String msg, String title, Uri alarmSound) {
 
 		NotificationManager mNotificationManager = (NotificationManager) this
 		    .getSystemService(Context.NOTIFICATION_SERVICE);
@@ -280,6 +282,8 @@ public class GcmIntentService extends IntentService {
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
 		    .setSmallIcon(R.drawable.ic_launcher).setContentTitle(title)
 		    .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
+		    .setAutoCancel(true)
+		    .setSound(alarmSound)
 		    .setContentText(msg);
 
 		mBuilder.setContentIntent(notifyPendingIntent);
@@ -311,7 +315,9 @@ public class GcmIntentService extends IntentService {
 		        getApplicationContext()
 		            .getString(R.string.ehonk_notification_title))
 		    .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
-		    .setAutoCancel(true)
+		    .setAutoCancel(false)
+		    .setOngoing(true)
+		    .setLights(Color.BLUE, 500, 500)
 		    .setSound(alarmSound)
 		    .setVibrate(pattern)
 		    .setContentText(msg);

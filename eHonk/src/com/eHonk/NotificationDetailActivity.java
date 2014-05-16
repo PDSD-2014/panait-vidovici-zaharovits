@@ -8,13 +8,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.opengl.Visibility;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -32,6 +29,8 @@ import android.os.Build;
 
 public class NotificationDetailActivity extends ActionBarActivity {
 
+	public Database.OffenseRecord offense = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,6 +39,7 @@ public class NotificationDetailActivity extends ActionBarActivity {
 		if (savedInstanceState == null) {
 			getSupportFragmentManager().beginTransaction()
 			    .add(R.id.container, new PlaceholderFragment()).commit();
+			offense = this.getNextOffense();
 		}
 	}
 
@@ -62,6 +62,30 @@ public class NotificationDetailActivity extends ActionBarActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	private Database.OffenseRecord getNextOffense() {
+		
+		Database db = Database.getInstance(this);
+
+		db.lock.lock();
+
+		try {
+			if (this.offense!=null)
+				db.removeOffense(Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV, this.offense);
+			
+			this.offense = db.getLastOffenses(
+			    Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV,
+			    Constants.iso8601Format.format(new Date(System.currentTimeMillis()
+			        - Constants.TIMEOUT)));
+
+			if (this.offense == null)
+				return null;
+		} finally {
+			db.lock.unlock();
+		}
+		
+		return this.offense;
+	}
 
 	/**
 	 * A placeholder fragment containing a simple view.
@@ -69,32 +93,14 @@ public class NotificationDetailActivity extends ActionBarActivity {
 	public static class PlaceholderFragment extends Fragment {
 
 		final AtomicInteger msgId = new AtomicInteger();
-		Database.OffenseRecord offense = getNextOffense(getActivity());
+		NotificationDetailActivity activity;
 		CountDownTimer cdt = null;
 		
-		private static Database.OffenseRecord getNextOffense(Context context) {
-			
-			Database db = Database.getInstance(context);
-			Database.OffenseRecord offense = null;
-
-			db.lock.lock();
-
-			try {
-				offense = db.getLastOffenses(
-				    Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV,
-				    Constants.iso8601Format.format(new Date(System.currentTimeMillis()
-				        - Constants.TIMEOUT)));
-
-				if (offense == null)
-					return null;
-
-				db.removeOffense(Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV, offense);
-
-			} finally {
-				db.lock.unlock();
-			}
-			
-			return offense;
+		@Override
+		public void onAttach(Activity activity) {
+		  super.onAttach(activity);
+		  
+		  this.activity = (NotificationDetailActivity)activity;
 		}
 		
 		private void showOffense(View rootView, Database.OffenseRecord offense) {
@@ -103,7 +109,10 @@ public class NotificationDetailActivity extends ActionBarActivity {
 				/* show Toast and close activity */
 				Toast.makeText(getActivity(), getActivity().getString(R.string.ehonk_notifications_expired_toast),
 				    Toast.LENGTH_LONG).show();
-				getActivity().finish();
+				NotificationManager mNotificationManager = (NotificationManager) activity
+				    .getSystemService(Context.NOTIFICATION_SERVICE);
+				mNotificationManager.cancel(GcmIntentService.NOTIFICATION_RECV_ID);
+				activity.finish();
 				return;
 			}
 			
@@ -195,18 +204,19 @@ public class NotificationDetailActivity extends ActionBarActivity {
 						Toast.makeText(getActivity().getApplicationContext(),
 						    "Message sent", Toast.LENGTH_LONG).show();
 						
-						/* get next notification */
-						PlaceholderFragment.this.offense = getNextOffense(getActivity());
-						if(PlaceholderFragment.this.offense==null) {
-							getActivity().finish();
+						activity.getNextOffense();
+						if(activity.offense==null) {
+							NotificationManager mNotificationManager = (NotificationManager) activity
+							    .getSystemService(Context.NOTIFICATION_SERVICE);
+							mNotificationManager.cancel(GcmIntentService.NOTIFICATION_RECV_ID);
+							activity.finish();
 							return;
-						}
+						}						
 						
-						Toast.makeText(getActivity().getApplicationContext(),
+						Toast.makeText(activity.getApplicationContext(),
 						    "Another notification!", Toast.LENGTH_LONG).show();
-						
 					} else {
-						Toast.makeText(getActivity().getApplicationContext(),
+						Toast.makeText(activity.getApplicationContext(),
 						    "Message failed to send: try again!", Toast.LENGTH_LONG).show();
 					}
 				}
@@ -222,7 +232,7 @@ public class NotificationDetailActivity extends ActionBarActivity {
 		  
 		  int totalMillis = 0;
       try {
-      	totalMillis = (int)(Constants.iso8601Format.parse(offense.getTimestamp()).getTime() + Constants.TIMEOUT - System.currentTimeMillis()) - 3131;
+      	totalMillis = (int)(Constants.iso8601Format.parse(activity.offense.getTimestamp()).getTime() + Constants.TIMEOUT - System.currentTimeMillis()) - 3131;
       } catch (ParseException e) {
 	      e.printStackTrace();
       }
@@ -235,8 +245,8 @@ public class NotificationDetailActivity extends ActionBarActivity {
 
         public void onFinish() {
         	/* update GUI , to show the next message */
-        	PlaceholderFragment.this.offense = getNextOffense(getActivity());
-        	showOffense(getView(), PlaceholderFragment.this.offense);
+        	activity.getNextOffense();
+        	showOffense(getView(), activity.offense);
         }
 			}.start();
 			
@@ -262,35 +272,8 @@ public class NotificationDetailActivity extends ActionBarActivity {
 			final View rootView = inflater.inflate(R.layout.fragment_notification_detail,
 			    container, false);
 
-			showOffense(rootView, this.offense);
+			showOffense(rootView, activity.offense);
 
-			/* set progress bar */
-			/*
-			final ProgressBar prgBar = (ProgressBar) rootView.findViewById(R.id.progressBar1);
-			final int prgBarMax = prgBar.getMax();
-			int totalMillis = 0;
-      try {
-      	totalMillis = (int)(Constants.iso8601Format.parse(offense.getTimestamp()).getTime() + Constants.TIMEOUT - System.currentTimeMillis()) - 3131;
-      } catch (ParseException e) {
-	      e.printStackTrace();
-      }
-			PlaceholderFragment.this.cdt = new CountDownTimer(totalMillis, 1000) { 
-
-        public void onTick(long millisUntilFinished) {
-            int progress = (int) ((millisUntilFinished * prgBarMax) / Constants.TIMEOUT);
-            prgBar.setProgress(progress);
-        }
-
-        public void onFinish() {
-        	PlaceholderFragment.this.offense = getNextOffense(getActivity());
-        	showOffense(rootView, PlaceholderFragment.this.offense);
-        }
-			}.start();
-			
-			int initialProgress = (totalMillis * prgBarMax) / Constants.TIMEOUT;
-			prgBar.setProgress(initialProgress);
-			*/
-			
 			/* set button actions */
 			Button btnYes = (Button) rootView.findViewById(R.id.yesButton);
 			Button btnNo = (Button) rootView.findViewById(R.id.noButton);
@@ -311,13 +294,13 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					bundle.putString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 					    license_plate);
 					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID,
-							PlaceholderFragment.this.offense.getGcmId());
+							activity.offense.getGcmId());
 					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
-							PlaceholderFragment.this.offense.getTimestamp());
+							activity.offense.getTimestamp());
 					
 					sendResponseToOffended(bundle);
 					
-					showOffense(rootView, PlaceholderFragment.this.offense);
+					showOffense(rootView, activity.offense);
 				}
 			});
 
@@ -333,13 +316,13 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					bundle.putString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 					    license_plate);
 					bundle.putString(Constants.PROPERTY_OFFENDED_GCM_ID,
-							PlaceholderFragment.this.offense.getGcmId());
+							activity.offense.getGcmId());
 					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
-							PlaceholderFragment.this.offense.getTimestamp());
+							activity.offense.getTimestamp());
 					
 					sendResponseToOffended(bundle);
 					
-					showOffense(rootView, PlaceholderFragment.this.offense);
+					showOffense(rootView, activity.offense);
 				}
 			});
 

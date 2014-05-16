@@ -42,6 +42,7 @@
         <activity
             android:name="com.eHonk.MainActivity"
             android:configChanges="orientation"
+            android:alwaysRetainTaskState="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -76,11 +77,17 @@
         <activity
             android:name="com.eHonk.NotificationDetailActivity"
             android:label="@string/title_activity_notification_detail"
+            android:alwaysRetainTaskState="true"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
+            android:launchMode="singleInstance"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" >
+            <!-- 
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:taskAffinity="" >
+             -->
         </activity>
     </application>
 
