@@ -349,6 +349,15 @@ public class MainActivity extends ActionBarActivity {
 			        new DialogInterface.OnClickListener() {
 				        @Override
 				        public void onClick(DialogInterface dialog, int id) {
+				        	
+				        	final String offender_license_plate = editText.getText()
+					            .toString();
+				        	
+				        	if(offender_license_plate.isEmpty()) {
+				        		Toast.makeText(mActivity.getApplicationContext(),
+						            "Invalid input", Toast.LENGTH_LONG).show();
+				        		return;
+				        	}
 
 					        new AsyncTask<Void, Void, Boolean>() {
 						        @Override
@@ -358,8 +367,7 @@ public class MainActivity extends ActionBarActivity {
 							        final String license_plate = MainActivity.getRegistrationLicense(mActivity);
 							        data.putString(Constants.PROPERTY_OFFENDED_LICENSE_PLATE,
 							            license_plate);
-							        final String offender_license_plate = editText.getText()
-							            .toString();
+							        
 							        data.putString(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 							            offender_license_plate);
 							        data.putString(Constants.PROPERTY_MESSAGE_TYPE,
