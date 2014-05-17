@@ -209,7 +209,7 @@ public class Database extends SQLiteOpenHelper {
 			SELECT_NOTIFICATIONS_QUERY = "SELECT * FROM " + table_name;
 		else
 			SELECT_NOTIFICATIONS_QUERY = "SELECT * FROM " + table_name + " WHERE "
-			    + NOTIFICATIONS_LICENSE + "=" + license;
+			    + NOTIFICATIONS_LICENSE + " = '" + license + "'";
 
 		Log.d("DB_TAG", SELECT_NOTIFICATIONS_QUERY);
 

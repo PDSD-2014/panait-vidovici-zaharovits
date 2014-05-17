@@ -18,6 +18,7 @@ package com.eHonk;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 
 import com.eHonk.R;
 import com.eHonk.Constants;
@@ -178,40 +179,51 @@ public class GcmIntentService extends IntentService {
 				    getApplicationContext()
 				        .getString(R.string.ehonk_notification_title));
 
-				/*
-				 * notifyIntent.putExtra(Constants.PROPERTY_OFFENSE_TIMESTAMP,
-				 * timestamp); notifyIntent.putExtra(Constants.PROPERTY_OFFENDED_GCM_ID,
-				 * intent.getStringExtra(Constants.PROPERTY_OFFENDED_GCM_ID));
-				 * notifyIntent.putExtra(Constants.PROPERTY_OFFENDED_LICENSE_PLATE,
-				 * intent.getStringExtra(Constants.PROPERTY_OFFENDED_LICENSE_PLATE));
-				 * notifyIntent.putExtra(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
-				 * intent.getStringExtra(Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
-				 */
-
-				/*
-				 * Intent serviceIntent = new Intent(this,
-				 * NotificationRecvIntentService.class);
-				 * serviceIntent.putExtra(Constants.PROPERTY_OFFENSE_TIMESTAMP, (String)
-				 * extras.get(Constants.PROPERTY_OFFENSE_TIMESTAMP));
-				 * serviceIntent.putExtra(Constants.PROPERTY_OFFENDED_LICENSE_PLATE,
-				 * (String) extras.get(Constants.PROPERTY_OFFENDED_LICENSE_PLATE));
-				 * serviceIntent.putExtra(Constants.PROPERTY_OFFENDERS_COUNT, (String)
-				 * extras.get(Constants.PROPERTY_OFFENDERS_COUNT));
-				 * serviceIntent.putExtra(Constants.PROPERTY_OFFENDED_GCM_ID, (String)
-				 * extras.get(Constants.PROPERTY_OFFENDED_GCM_ID));
-				 * serviceIntent.putExtra(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
-				 * (String) extras.get(Constants.PROPERTY_OFFENDER_LICENSE_PLATE));
-				 * 
-				 * startService(serviceIntent);
-				 */
-
 			} else if (Constants.LABEL_UNKNOWNDRIVER_MESSAGE.equals(messageType)) {
+				
 				String msg;
 				final String offender_license = (String) extras
 				    .get(Constants.PROPERTY_OFFENDER_LICENSE_PLATE);
 				msg = String.format(
 				    getApplicationContext().getString(
 				        R.string.offense_notification_content3), offender_license);
+				
+				Database db = Database.getInstance(this);
+				String tableName = Database.NOTIFICATIONS_LOG_TABLE_NAME_SENT;
+
+				/* next db transactions need to be atomic */
+				db.lock.lock();
+				
+				try {
+					List<Database.OffenseRecord> offenses = db.selectOffenses(tableName, offender_license);
+
+					if (offenses.isEmpty()) {
+						/* new offended driver */
+						Database.OffenseRecord offense = db.new OffenseRecord();
+						offense.setLicense( offender_license);
+						offense.setTimestamp( extras
+						    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+						offense.setTypeCode(Database.NOTIFICATION_STATUS_NREG);
+						offense.setStatusCode(Database.NOTIFICATION_STATUS_NREG);
+
+						offense.setRetriesCount(1);
+
+						db.addOffense(tableName, offense);
+					}
+					else {
+						for (Database.OffenseRecord offenseRecord : offenses) {
+	            offenseRecord.setTimestamp(extras
+							    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+	            offenseRecord.setTypeCode(Database.NOTIFICATION_STATUS_NREG);
+	            offenseRecord.setStatusCode(Database.NOTIFICATION_STATUS_NREG);
+							offenseRecord.setRetriesCount( offenseRecord.getRetriesCount() + 1);
+							
+							db.updateOffense(tableName, offenseRecord);
+            }
+					}
+				} finally {
+					db.lock.unlock();
+				}				
 
 				sendSimpleNotification(
 				    msg,
@@ -219,6 +231,7 @@ public class GcmIntentService extends IntentService {
 				        R.string.ehonk_notification_title2), null);
 
 			} else if (Constants.LABEL_NOTIFYACK_MESSAGE.equals(messageType)) {
+				
 				String msg;
 				final String offender_license = (String) extras
 				    .get(Constants.PROPERTY_OFFENDER_LICENSE_PLATE);
@@ -227,12 +240,66 @@ public class GcmIntentService extends IntentService {
 				msg = String.format(
 				    getApplicationContext().getString(
 				        R.string.offense_notification_content4), count_alerted_drivers);
+				
+				Database db = Database.getInstance(this);
+				String tableName = Database.NOTIFICATIONS_LOG_TABLE_NAME_SENT;
+
+				/* next db transactions need to be atomic */
+				db.lock.lock();
+				
+				try {
+					List<Database.OffenseRecord> offenses = db.selectOffenses(tableName, offender_license);
+
+					if (offenses.isEmpty()) {
+						/* new offended driver */
+						Database.OffenseRecord offense = db.new OffenseRecord();
+						offense.setLicense( offender_license);
+						offense.setTimestamp( extras
+						    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+						Integer offenders_count = Integer.parseInt(extras
+						    .getString(Constants.PROPERTY_OFFENDERS_COUNT));
+						if (offenders_count > 1)
+							offense.setTypeCode(Database.NOTIFICATION_TYPE_MULTISENT);
+						else
+							offense.setTypeCode(Database.NOTIFICATION_TYPE_SENT);
+						offense.setStatusCode(Database.NOTIFICATION_STATUS_NOTIFIED);
+						/* extras is the number of offended drivers */
+						offense.setOtherDetails(extras
+						    .getString(Constants.PROPERTY_OFFENDERS_COUNT));
+						offense.setRetriesCount(1);
+
+						db.addOffense(tableName, offense);
+					}
+					else {
+						for (Database.OffenseRecord offenseRecord : offenses) {
+	            offenseRecord.setTimestamp(extras
+							    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+							Integer offenders_count = Integer.parseInt(extras
+							    .getString(Constants.PROPERTY_OFFENDERS_COUNT));
+							if (offenders_count > 1)
+								offenseRecord.setTypeCode(Database.NOTIFICATION_TYPE_MULTISENT);
+							else
+								offenseRecord.setTypeCode(Database.NOTIFICATION_TYPE_SENT);
+							offenseRecord.setStatusCode(Database.NOTIFICATION_STATUS_NOTIFIED);
+							/* extras is the number of offended drivers */
+							offenseRecord.setOtherDetails(extras
+							    .getString(Constants.PROPERTY_OFFENDERS_COUNT));
+							offenseRecord.setRetriesCount( offenseRecord.getRetriesCount() + 1);
+							
+							db.updateOffense(tableName, offenseRecord);
+            }
+					}
+				} finally {
+					db.lock.unlock();
+				}
 
 				sendSimpleNotification(
 				    msg,
 				    getApplicationContext().getString(
 				        R.string.ehonk_notification_title3), null);
+				
 			} else if (Constants.LABEL_NOTIFY_RESPONSE_MESSAGE.equals(messageType)) {
+				
 				String msg = "", title = "";
 				final String response = extras
 				    .getString(Constants.PROPERTY_RESPONSE_TYPE);
@@ -250,6 +317,54 @@ public class GcmIntentService extends IntentService {
 					        R.string.no_response_notification), offender_license);
 					title = getApplicationContext().getString(
 					    R.string.ehonk_notification_title5);
+				}
+				
+				Database db = Database.getInstance(this);
+				String tableName = Database.NOTIFICATIONS_LOG_TABLE_NAME_SENT;
+
+				/* next db transactions need to be atomic */
+				db.lock.lock();
+				
+				try {
+					List<Database.OffenseRecord> offenses = db.selectOffenses(tableName, offender_license);
+
+					String response_timestamp = Constants.iso8601Format.format(new Date());
+					
+					if (offenses.isEmpty()) {
+						/* new offended driver */
+						Database.OffenseRecord offense = db.new OffenseRecord();
+						offense.setLicense( offender_license);
+						offense.setTimestamp( extras
+						    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+						if( response.equals(Constants.VALUE_RESPONSE_COMING)) {
+							offense.setStatusCode(Database.NOTIFICATION_STATUS_ACK_OK);
+						}
+						else if (response.equals(Constants.VALUE_RESPONSE_IGNORE)) {
+							offense.setStatusCode(Database.NOTIFICATION_STATUS_ACK_IGN);
+						}
+						
+						/* extras is the response timestamp */
+						offense.setOtherDetails( response_timestamp);
+
+						db.addOffense(tableName, offense);
+					}
+					else {
+						for (Database.OffenseRecord offenseRecord : offenses) {
+	            offenseRecord.setTimestamp(extras
+							    .getString(Constants.PROPERTY_OFFENSE_TIMESTAMP));
+							if( response.equals(Constants.VALUE_RESPONSE_COMING)) {
+								offenseRecord.setStatusCode(Database.NOTIFICATION_STATUS_ACK_OK);
+							}
+							else if (response.equals(Constants.VALUE_RESPONSE_IGNORE)) {
+								offenseRecord.setStatusCode(Database.NOTIFICATION_STATUS_ACK_IGN);
+							}
+
+							/* extras is the number of offended drivers */
+							db.updateOffense(tableName, offenseRecord);
+            }
+					}
+				} finally {
+					db.lock.unlock();
 				}
 
 				Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);

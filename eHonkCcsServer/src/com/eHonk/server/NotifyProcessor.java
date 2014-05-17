@@ -54,6 +54,8 @@ public class NotifyProcessor implements PayloadProcessor {
 				payload.put(Constants.PROPERTY_OFFENDERS_COUNT, "" + offenders.size());
 				payload.put(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 				    offender_license_plate);
+				payload.put(Constants.PROPERTY_OFFENSE_TIMESTAMP,
+				    msg.getPayload().get(Constants.PROPERTY_OFFENSE_TIMESTAMP));
 				String jsonRequest = CcsClient.createJsonMessage(msg.getFrom(), /* to */
 				    client.getRandomMessageId(msg.getFrom().substring(0, 10)), payload,
 				    null, null, // TTL (null -> default-TTL)
@@ -64,6 +66,8 @@ public class NotifyProcessor implements PayloadProcessor {
 				    Constants.LABEL_UNKNOWNDRIVER_MESSAGE);
 				payload.put(Constants.PROPERTY_OFFENDER_LICENSE_PLATE,
 				    offender_license_plate);
+				payload.put(Constants.PROPERTY_OFFENSE_TIMESTAMP,
+				    msg.getPayload().get(Constants.PROPERTY_OFFENSE_TIMESTAMP));
 				/* there is no registered driver */
 				String jsonRequest = CcsClient.createJsonMessage(msg.getFrom(), /* to */
 				    client.getRandomMessageId(msg.getFrom().substring(0, 10)), payload,

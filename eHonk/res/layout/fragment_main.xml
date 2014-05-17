@@ -32,6 +32,7 @@
             android:layout_gravity="center|left"
             android:padding="10dp"
             android:maxEms="15"
+            android:background="@drawable/back_border"
             android:text="" />
                 
         <TextView

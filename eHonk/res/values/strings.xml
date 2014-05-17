@@ -9,7 +9,7 @@
     <string name="notifications_list_button">Notifications</string>
     <string name="register_button">Register</string>
     <string name="license_plate_hint">Enter License Plate</string>
-    <string name="no_vehicule">No vehicle registered!</string>
+    <string name="no_vehicule">No vehicle!</string>
     <string name="vehicule">Vehicle:</string>
     <string name="change_license">Change</string>
     <string name="change_license_title">Change License</string>
