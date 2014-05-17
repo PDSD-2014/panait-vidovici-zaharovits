@@ -257,6 +257,15 @@ public class MainActivity extends ActionBarActivity {
 	public static boolean isRegistered(Context context) {
 		final SharedPreferences prefs = context.getSharedPreferences(
 		    MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+		
+		int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION,
+		    Integer.MIN_VALUE);
+		int currentVersion = getAppVersion(context);
+		if (registeredVersion != currentVersion) {
+			Log.i(Constants.TAG, "App version changed.");
+			return false;
+		}
+		
 		return prefs.getBoolean(PROPERTY_IS_REGISTERED, false);
 	}
 

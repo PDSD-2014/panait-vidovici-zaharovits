@@ -230,6 +230,13 @@ public class NotificationDetailActivity extends ActionBarActivity {
 		  final ProgressBar prgBar = (ProgressBar) getView().findViewById(R.id.progressBar1);
 		  final int prgBarMax = prgBar.getMax();
 		  
+		  if(activity.offense == null) {
+		  	Toast.makeText(activity, activity.getString(R.string.ehonk_notifications_expired_toast),
+				    Toast.LENGTH_LONG).show();
+		  	activity.finish();
+		  	return;
+		  }
+		  
 		  int totalMillis = 0;
       try {
       	totalMillis = (int)(Constants.iso8601Format.parse(activity.offense.getTimestamp()).getTime() + Constants.TIMEOUT - System.currentTimeMillis()) - 3131;
