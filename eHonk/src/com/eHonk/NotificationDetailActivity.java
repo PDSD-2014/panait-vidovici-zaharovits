@@ -25,7 +25,6 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.os.Build;
 
 public class NotificationDetailActivity extends ActionBarActivity {
 
@@ -73,7 +72,7 @@ public class NotificationDetailActivity extends ActionBarActivity {
 			if (this.offense!=null)
 				db.removeOffense(Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV, this.offense);
 			
-			this.offense = db.getLastOffenses(
+			this.offense = db.getLastOffense(
 			    Database.NOTIFICATIONS_LOG_TABLE_NAME_RECV,
 			    Constants.iso8601Format.format(new Date(System.currentTimeMillis()
 			        - Constants.TIMEOUT)));

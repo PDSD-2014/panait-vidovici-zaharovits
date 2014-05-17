@@ -53,8 +53,6 @@ public class NotifyFragment extends Fragment {
 		} else {
 			textViewLicenseInfo.setText(license);
 		}
-		
-		
 
 		Button stuckButton = (Button) rootView.findViewById(R.id.stuck_button);
 		stuckButton
@@ -63,6 +61,22 @@ public class NotifyFragment extends Fragment {
 					@Override
 					public void onClick(View v) {
 						new MainActivity.StuckDialogFragment().show(mActivity.getSupportFragmentManager(), "stuck");
+					}
+				});
+		
+		Button notificationsButton = (Button) rootView.findViewById(R.id.notification_list_button);
+		notificationsButton
+				.setOnClickListener(new View.OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						android.support.v4.app.FragmentManager fm = mActivity.getSupportFragmentManager();
+						android.support.v4.app.FragmentTransaction ft3 = fm
+						    .beginTransaction();
+						NotificationListFragment fragment = new NotificationListFragment();
+						ft3.replace(R.id.container, fragment, "fragment_tag3");
+						ft3.addToBackStack("tag3");
+						ft3.commit();
 					}
 				});
 

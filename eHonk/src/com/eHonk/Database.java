@@ -90,6 +90,11 @@ public class Database extends SQLiteOpenHelper {
 		public void setGcmId(String gcm_id) {
 			this.gcm_id = gcm_id;
 		}
+		
+		@Override
+		public String toString() {
+		  return this.license + "_" + this.timestamp;
+		}
 	}
 
 	public static SimpleDateFormat iso8601Format = new SimpleDateFormat(
@@ -320,7 +325,7 @@ public class Database extends SQLiteOpenHelper {
 		return ret;
 	}
 
-	public OffenseRecord getLastOffenses(String table_name, String timestamp) {
+	public OffenseRecord getLastOffense(String table_name, String timestamp) {
 
 		if (!check_table_name(table_name))
 			return null;
@@ -356,6 +361,41 @@ public class Database extends SQLiteOpenHelper {
 
 		return offense;
 	}
+	
+	public ArrayList<OffenseRecord> getLastOffenses(String table_name, String timestamp) {
+
+		if (!check_table_name(table_name))
+			return null;
+
+		ArrayList<OffenseRecord> result = new ArrayList<OffenseRecord>();
+
+		SQLiteDatabase db = this.getReadableDatabase();
+
+		String SELECT_LAST_NOTIFICATIONS = "SELECT * FROM " + table_name
+		    + " WHERE " + NOTIFICATIONS_TIMESTAMP + " > '" + timestamp
+		    + "' ORDER BY date(" + NOTIFICATIONS_TIMESTAMP + ") ASC";
+
+		Cursor cursor = db.rawQuery(SELECT_LAST_NOTIFICATIONS, null);
+		
+		if (cursor.moveToFirst()) {
+			do {
+				OffenseRecord offense = new OffenseRecord();
+				offense.setNotificationId(Integer.parseInt(cursor.getString(0)));
+				offense.setLicense(cursor.getString(1));
+				offense.setGcmId(cursor.getString(2));
+				offense.setTimestamp(cursor.getString(3));
+				offense.setTypeCode(Integer.parseInt(cursor.getString(4)));
+				offense.setStatusCode(Integer.parseInt(cursor.getString(5)));
+				offense.setOtherDetails(cursor.getString(6));
+				offense.setRetriesCount(Integer.parseInt(cursor.getString(7)));
+				result.add(offense);
+			} while (cursor.moveToNext());
+		}
+
+		db.close();
+
+		return result;
+	}	
 
 	public int generateNextId(String table_name, String primaryKeyName) {
 

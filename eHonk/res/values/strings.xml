@@ -6,6 +6,7 @@
     <string name="send_buton">Send Message!</string>
     <string name="echo_button">Get echo!</string>
     <string name="stuck_button">I am stuck!</string>
+    <string name="notifications_list_button">Notifications</string>
     <string name="register_button">Register</string>
     <string name="license_plate_hint">Enter License Plate</string>
     <string name="no_vehicule">No vehicle registered!</string>
@@ -45,5 +46,7 @@
     <string name="no_response_notification">Driver %s ignored you.</string>
     
     <string name="ehonk_notifications_expired_toast">Notifications have expired.</string>
+    
+    <string name="empty_notifications_list">No sent notifications</string>
     
 </resources>
