@@ -35,14 +35,20 @@ public class NotificationListFragment extends ListFragment {
 		try {
 			offenses = db.getLastOffenses(Database.NOTIFICATIONS_LOG_TABLE_NAME_SENT,
 			    Constants.iso8601Format.format(new Date(timestampmili)));
+			if(offenses==null || offenses.isEmpty()) {
+				/* garbage collect - delete all sent notifications, as there is none recent */
+				db.deleteAll(Database.NOTIFICATIONS_LOG_TABLE_NAME_SENT);
+			}
 		} finally {
 			db.lock.unlock();
 		}
 
 		if(offenses==null || offenses.isEmpty()) {
+			/* no recent sent notifications */
 			Toast.makeText(getActivity(),
 			    getActivity().getString(R.string.empty_notifications_list),
 			    Toast.LENGTH_LONG).show();
+			/* close list */
 			getActivity().getSupportFragmentManager().popBackStack(null, 0);
 		}
 		

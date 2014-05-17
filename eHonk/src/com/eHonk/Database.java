@@ -289,6 +289,16 @@ public class Database extends SQLiteOpenHelper {
 		db.close();
 	}
 	
+	public void deleteAll(String table_name) {
+
+		if (!check_table_name(table_name))
+			return;
+		
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.delete(table_name, null, null);
+		db.close();
+	}
+	
 	public void removeOffense(String table_name, OffenseRecord offense) {
 
 		if (!check_table_name(table_name))
