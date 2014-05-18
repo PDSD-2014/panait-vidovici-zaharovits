@@ -48,6 +48,8 @@ public class GcmIntentService extends IntentService {
 
 	public static final int NOTIFICATION_ID = 13136;
 	public static final int NOTIFICATION_RECV_ID = 613136;
+	
+	public static Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
 	public GcmIntentService() {
 		super("GcmIntentService");
@@ -228,7 +230,7 @@ public class GcmIntentService extends IntentService {
 				sendSimpleNotification(
 				    msg,
 				    getApplicationContext().getString(
-				        R.string.ehonk_notification_title2), null);
+				        R.string.ehonk_notification_title2), alarmSound);
 
 			} else if (Constants.LABEL_NOTIFYACK_MESSAGE.equals(messageType)) {
 				
@@ -296,7 +298,7 @@ public class GcmIntentService extends IntentService {
 				sendSimpleNotification(
 				    msg,
 				    getApplicationContext().getString(
-				        R.string.ehonk_notification_title3), null);
+				        R.string.ehonk_notification_title3), alarmSound);
 				
 			} else if (Constants.LABEL_NOTIFY_RESPONSE_MESSAGE.equals(messageType)) {
 				
@@ -367,7 +369,6 @@ public class GcmIntentService extends IntentService {
 					db.lock.unlock();
 				}
 
-				Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 				sendSimpleNotification(msg, title, alarmSound);
 
 			} else {

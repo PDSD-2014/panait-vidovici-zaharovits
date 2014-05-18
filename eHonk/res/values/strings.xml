@@ -55,5 +55,6 @@
     <string name="tw_notification_status_ack_ign">Driver ignored you</string>
     
     <string name="toast_waiting_driver">Wait %d more minutes</string>
+    <string name="toast_check_notifications_list">Check Notifications</string>
     
 </resources>
