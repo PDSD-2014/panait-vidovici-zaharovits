@@ -242,7 +242,7 @@ public class NotificationDetailActivity extends ActionBarActivity {
       } catch (ParseException e) {
 	      e.printStackTrace();
       }
-			PlaceholderFragment.this.cdt = new CountDownTimer(totalMillis, 1000) { 
+			PlaceholderFragment.this.cdt = new CountDownTimer(totalMillis, 2000) { 
 
         public void onTick(long millisUntilFinished) {
             int progress = (int) ((millisUntilFinished * prgBarMax) / Constants.TIMEOUT);

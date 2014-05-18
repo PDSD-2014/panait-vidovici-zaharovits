@@ -24,6 +24,7 @@
         style="@style/eHonkButtonStyle1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:inputType="textNoSuggestions"
         android:background="@drawable/back_border"
         android:padding="5dp"
         android:visibility="gone" />

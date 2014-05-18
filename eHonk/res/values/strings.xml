@@ -49,4 +49,9 @@
     
     <string name="empty_notifications_list">No sent notifications</string>
     
+    <string name="tw_notification_status_nreg">Not registered</string>
+    <string name="tw_notification_status_notified">Notified</string>
+    <string name="tw_notification_status_ack_ok">Driver is coming</string>
+    <string name="tw_notification_status_ack_ign">Driver ignored you</string>
+    
 </resources>

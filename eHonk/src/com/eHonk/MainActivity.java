@@ -369,7 +369,9 @@ public class MainActivity extends ActionBarActivity {
 					        final String offender_license_plate = editText.getText()
 					            .toString();
 
-					        if (offender_license_plate.isEmpty()) {
+					        if ( offender_license_plate.isEmpty()
+					            || offender_license_plate.length() > Constants.MAX_LICENSEPLATE_LENGTH ) {
+					        	
 						        Toast.makeText(mActivity.getApplicationContext(),
 						            "Invalid input", Toast.LENGTH_LONG).show();
 						        return;
@@ -494,6 +496,20 @@ public class MainActivity extends ActionBarActivity {
 		public void onClick(View v) {
 
 			if (this.registerRequestSent.compareAndSet(false, true)) {
+				
+				EditText editTextButton = (EditText) registerFragmentView
+				    .findViewById(R.id.editText_license_plate);
+
+				final String license_plate = editTextButton.getText().toString();
+
+        if ( license_plate.isEmpty()
+            || license_plate.length() > Constants.MAX_LICENSEPLATE_LENGTH ) {
+        	
+	        Toast.makeText(getApplicationContext(),
+	            "Invalid input", Toast.LENGTH_LONG).show();
+	        this.registerRequestSent.set(false);
+	        return;
+        }
 
 				// wait for gcm Register Task
 				new AsyncTask<Void, Void, Boolean>() {
@@ -512,14 +528,6 @@ public class MainActivity extends ActionBarActivity {
 								return false;
 							}
 						}
-
-						EditText editTextButton = (EditText) registerFragmentView
-						    .findViewById(R.id.editText_license_plate);
-
-						final String license_plate = editTextButton.getText().toString();
-
-						if (license_plate.isEmpty())
-							return false;
 
 						Bundle data = new Bundle();
 						data.putString(Constants.PROPERTY_LICENSE_PLATE, license_plate);
