@@ -67,6 +67,16 @@ public class MainActivity extends ActionBarActivity {
 	Context context;
 	String regid;
 
+	private static boolean validateInputRegistration(String input) {
+		if (input.isEmpty() || input.length() > Constants.MAX_LICENSEPLATE_LENGTH)
+			return false;
+		if (input.contains("#") || input.contains(".") || input.contains("!")
+		    || input.contains(";") || input.contains("*") || input.contains("'"))
+			return false;
+
+		return true;
+	}
+
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		super.onSaveInstanceState(savedInstanceState);
@@ -369,10 +379,8 @@ public class MainActivity extends ActionBarActivity {
 					        final String offender_license_plate = editText.getText()
 					            .toString();
 
-					        if ( offender_license_plate.isEmpty()
-					            || offender_license_plate.length() > Constants.MAX_LICENSEPLATE_LENGTH ) {
-					        	
-						        Toast.makeText(mActivity.getApplicationContext(),
+					        if(!validateInputRegistration(offender_license_plate)) {
+					        	Toast.makeText(mActivity.getApplicationContext(),
 						            "Invalid input", Toast.LENGTH_LONG).show();
 						        return;
 					        }
@@ -496,20 +504,19 @@ public class MainActivity extends ActionBarActivity {
 		public void onClick(View v) {
 
 			if (this.registerRequestSent.compareAndSet(false, true)) {
-				
+
 				EditText editTextButton = (EditText) registerFragmentView
 				    .findViewById(R.id.editText_license_plate);
 
 				final String license_plate = editTextButton.getText().toString();
 
-        if ( license_plate.isEmpty()
-            || license_plate.length() > Constants.MAX_LICENSEPLATE_LENGTH ) {
-        	
-	        Toast.makeText(getApplicationContext(),
-	            "Invalid input", Toast.LENGTH_LONG).show();
-	        this.registerRequestSent.set(false);
-	        return;
-        }
+				if(!validateInputRegistration(license_plate)) {
+
+					Toast.makeText(getApplicationContext(), "Invalid input",
+					    Toast.LENGTH_LONG).show();
+					this.registerRequestSent.set(false);
+					return;
+				}
 
 				// wait for gcm Register Task
 				new AsyncTask<Void, Void, Boolean>() {

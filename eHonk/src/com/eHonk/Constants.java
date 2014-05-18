@@ -34,7 +34,7 @@ public final class Constants {
 	public static final String LABEL_CHANGEDRIVER_MESSAGE = "register_update_message";
 	public static final String LABEL_NODRIVER_MESSAGE = "iamnotadriver_message";
 	
-	public static final int MAX_LICENSEPLATE_LENGTH = 15;
+	public static final int MAX_LICENSEPLATE_LENGTH = 14;
 	
 	public static final int MAX_ATTEMPTS = 5;
 	public static final int BACKOFF_MILLI_SECONDS = 1000;
