@@ -179,11 +179,20 @@ public class NotificationListFragment extends ListFragment {
 			int interval_minutes = (int)(interval / (1000 * 60));
 			interval_minutes++;
 			
-			Toast.makeText(
-			    getActivity(),
-			    String.format(
-			        getActivity().getApplicationContext().getString(
-			            R.string.toast_waiting_driver), interval_minutes), Toast.LENGTH_SHORT).show();
+			if(interval_minutes >= 1) {
+				Toast.makeText(
+				    getActivity(),
+				    String.format(
+				        getActivity().getApplicationContext().getString(
+				            R.string.toast_waiting_driver), interval_minutes), Toast.LENGTH_SHORT).show();
+			} else {
+				Toast.makeText(
+				    getActivity(),
+				    getActivity().getApplicationContext().getString(
+				        R.string.ehonk_notifications_expired_toast), Toast.LENGTH_SHORT)
+				    .show();
+			}
+			
 		} else if (status == Database.NOTIFICATION_STATUS_ACK_OK) {
 			Toast.makeText(
 			    getActivity(),
