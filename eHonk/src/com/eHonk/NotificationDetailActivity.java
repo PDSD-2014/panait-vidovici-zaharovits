@@ -134,9 +134,10 @@ public class NotificationDetailActivity extends ActionBarActivity {
 			}
 		}
 
-		private void sendResponseToOffended(Bundle bundle) {
+		private void sendResponseToOffended(Bundle bundle, View rootView) {
 
 			final Bundle data = bundle;
+			final View view = rootView;
 
 			new AsyncTask<Void, Void, Boolean>() {
 				@Override
@@ -210,7 +211,9 @@ public class NotificationDetailActivity extends ActionBarActivity {
 							mNotificationManager.cancel(GcmIntentService.NOTIFICATION_RECV_ID);
 							activity.finish();
 							return;
-						}						
+						}
+						
+						showOffense(view, activity.offense);
 						
 						Toast.makeText(activity.getApplicationContext(),
 						    "Another notification!", Toast.LENGTH_LONG).show();
@@ -304,9 +307,9 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
 							activity.offense.getTimestamp());
 					
-					sendResponseToOffended(bundle);
+					sendResponseToOffended(bundle, rootView);
 					
-					showOffense(rootView, activity.offense);
+					//showOffense(rootView, activity.offense);
 				}
 			});
 
@@ -326,9 +329,9 @@ public class NotificationDetailActivity extends ActionBarActivity {
 					bundle.putString(Constants.PROPERTY_OFFENSE_TIMESTAMP,
 							activity.offense.getTimestamp());
 					
-					sendResponseToOffended(bundle);
+					sendResponseToOffended(bundle, rootView);
 					
-					showOffense(rootView, activity.offense);
+					//showOffense(rootView, activity.offense);
 				}
 			});
 
