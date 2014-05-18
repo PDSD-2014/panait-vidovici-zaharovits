@@ -15,6 +15,9 @@ public class NotifyProcessor implements PayloadProcessor {
 		final Map<String, String> payload = new HashMap<String, String>(5);
 		final Datastore ds = Datastore.getDatastore();
 		final CcsClient client = CcsClient.getInstance();
+		
+		final String offended_license_plate = msg.getPayload().get(
+		    Constants.PROPERTY_OFFENDED_LICENSE_PLATE);
 
 		final String offender_license_plate = msg.getPayload().get(
 		    Constants.PROPERTY_OFFENDER_LICENSE_PLATE);
@@ -29,8 +32,7 @@ public class NotifyProcessor implements PayloadProcessor {
 				payload.put(Constants.PROPERTY_MESSAGE_TYPE,
 				    Constants.LABEL_NOTIFY_MESSAGE);
 				payload.put(Constants.PROPERTY_OFFENDERS_COUNT, "" + offenders.size());
-				final String offended_license_plate = msg.getPayload().get(
-				    Constants.PROPERTY_OFFENDED_LICENSE_PLATE);
+
 				payload.put(Constants.PROPERTY_OFFENDED_LICENSE_PLATE, offended_license_plate);
 				payload.put(Constants.PROPERTY_OFFENDED_GCM_ID, msg.getFrom());
 				payload.put(Constants.PROPERTY_OFFENSE_TIMESTAMP,

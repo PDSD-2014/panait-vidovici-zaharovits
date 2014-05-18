@@ -25,6 +25,7 @@ import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
+import org.jivesoftware.smack.filter.ThreadFilter;
 import org.jivesoftware.smack.packet.DefaultPacketExtension;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
@@ -381,7 +382,8 @@ public class CcsClient {
 		config.setDebuggerEnabled(mDebuggable);
 
 		// -Dsmack.debugEnabled=true
-		XMPPConnection.DEBUG_ENABLED = true;
+		//XMPPConnection.DEBUG_ENABLED = true;
+		XMPPConnection.DEBUG_ENABLED = mDebuggable;
 
 		connection = new XMPPConnection(config);
 		connection.connect();
@@ -485,14 +487,32 @@ public class CcsClient {
 		// final String password = args[1];
 		final String password = mApiKey;
 
-		//CcsClient ccsClient = CcsClient.prepareClient(projectId, password, true);
-		CcsClient ccsClient = CcsClient.prepareClient(projectId, password, true);
+		final CcsClient ccsClient = CcsClient.prepareClient(projectId, password, false);
 
 		try {
 			ccsClient.connect();
 		} catch (XMPPException e) {
 			e.printStackTrace();
 		}
-
+		
+		/* start sleeping thread, so that the connection stays open */
+		Thread t = new Thread( new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					synchronized (this) {
+						while(true) {
+							this.wait();
+						}
+          }					
+				} catch (InterruptedException e) {
+	        e.printStackTrace();
+        }
+			}
+		});
+		
+		t.start();
+		
 	}
 }
